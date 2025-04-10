@@ -31,6 +31,15 @@ exports.userSignup = async (req, res, next) => {
             });
         }
 
+        user = await Student.findOne({phone: req.body.phone}).exec();
+
+        if (user) {
+            if (req.file)
+                deleteFile.deleteFile(req.file.path);
+            return res.status(409).json({
+                message: 'Phone number is already in use - Student'
+            });
+        }
 
         const hash = await bcrypt.hash(req.body.password, 10);
 
