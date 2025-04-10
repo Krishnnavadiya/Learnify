@@ -8,7 +8,6 @@ const Student = require('../models/student');
 const Educator = require("../models/educator");
 const Token = require("../models/token");
 
-
 exports.userSignup = async (req, res, next) => {
     try {
         let user = await Student.findOne({email: req.body.email}).exec();
@@ -74,6 +73,43 @@ exports.userSignup = async (req, res, next) => {
         if (req.file) {
             deleteFile.deleteFile(req.file.path);
         }
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
+
+exports.userLogin = async (req, res, next) => {
+    try {
+        const user = await Student.findOne({email: req.body.email}).exec();
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User does not exist - Student'
+            });
+        }
+
+        const result = await bcrypt.compare(req.body.password, user.password);
+
+        if (result) {
+            const token = jwt.sign(
+                {
+                    email: user.email,
+                    userId: user._id,
+                    userType: 'student'
+                },
+                process.env.JWT_KEY,
+                {
+                    expiresIn: process.env.JWT_EXPIRES_IN
+                }
+            );
+            return res.status(200).json({
+                message: 'Logged In Successfully - Student',
+                token: token
+            });
+        }
+    } catch (err) {
+        console.log(err);
         return res.status(500).json({
             error: err
         });
