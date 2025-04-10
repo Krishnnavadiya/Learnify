@@ -291,6 +291,15 @@ exports.updatePassword = async (req, res, next) => {
             });
         }
 
+        const token = await Token.findOne({token: req.body.token}).exec();
+        if (!token) {
+            return res.status(404).json({
+                message: 'Token not found - Student'
+            });
+        }
+
+        await Token.deleteOne({token: req.body.token}).exec();
+
         user.password = await bcrypt.hash(req.body.password, 10);
 
         await user.save();
