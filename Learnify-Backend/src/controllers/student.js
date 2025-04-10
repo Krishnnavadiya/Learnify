@@ -280,3 +280,28 @@ exports.resetPassword = async (req, res, next) => {
         return res.status(500).json({message: 'Internal server error'});
     }
 };
+
+
+exports.updatePassword = async (req, res, next) => {
+    try {
+        const user = await Student.findOne({email: req.body.email}).exec();
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found - Student'
+            });
+        }
+
+        user.password = await bcrypt.hash(req.body.password, 10);
+
+        await user.save();
+
+        return res.status(200).json({
+            message: 'Password updated successfully'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
