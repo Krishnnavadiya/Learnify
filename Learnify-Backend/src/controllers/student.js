@@ -192,3 +192,26 @@ exports.userDelete = async (req, res, next) => {
         });
     }
 };
+
+
+exports.resetPassword = async (req, res, next) => {
+    try {
+        const user = await Student.findOne({email: req.body.email}).exec();
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found - Student'
+            });
+        }
+
+
+        await sendEmail(user.email, subject, body);
+
+        return res.status(200).json({
+            message: 'Email sent successfully',
+        });
+
+    } catch (error) {
+        return res.status(500).json({message: 'Internal server error'});
+    }
+};
