@@ -8,6 +8,9 @@ const post = new mongoose.Schema({
     body: {
         type: String,
     },
+    attachments: {
+        type: [String],
+    },
     createdOn: {
         type: Date,
         default: Date.now(),
