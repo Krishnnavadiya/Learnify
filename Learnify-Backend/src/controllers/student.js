@@ -21,6 +21,16 @@ exports.userSignup = async (req, res, next) => {
             });
         }
 
+        user = await Student.findOne({username: req.body.username}).exec();
+
+        if (user) {
+            if (req.file)
+                deleteFile.deleteFile(req.file.path);
+            return res.status(409).json({
+                message: 'Username is already in use - Student'
+            });
+        }
+
 
         const hash = await bcrypt.hash(req.body.password, 10);
 
