@@ -107,6 +107,10 @@ exports.userLogin = async (req, res, next) => {
                 message: 'Logged In Successfully - Student',
                 token: token
             });
+        } else {
+            return res.status(404).json({
+                message: 'Wrong Password - Student'
+            });
         }
     } catch (err) {
         console.log(err);
