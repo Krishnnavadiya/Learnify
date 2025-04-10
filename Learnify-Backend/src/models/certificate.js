@@ -9,6 +9,14 @@ const certificateSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Educator',
     },
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+    },
+    dateCreated: {
+        type: Date,
+        default: Date.now(),
+    }
 });
 
 const Certificate = mongoose.model('Certificate', certificateSchema);
