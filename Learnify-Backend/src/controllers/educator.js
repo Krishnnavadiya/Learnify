@@ -191,3 +191,90 @@ exports.userDelete = async (req, res, next) => {
         });
     }
 };
+
+exports.resetPassword = async (req, res, next) => {
+    try {
+        const user = await Educator.findOne({email: req.body.email}).exec();
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found - Educator'
+            });
+        }
+
+        let token = await Token.findOne({userId: user._id});
+        if (!token) {
+            token = new Token({
+                userId: user._id,
+                token: crypto.randomBytes(16).toString('hex')
+            });
+            await token.save();
+        }
+
+        const resetLink = `https://common-ground.netlify.app/educator/resetpassword/${user.email}/${token.token}`;
+        const subject = 'Reset Password - Common Ground'
+        const body = `
+            <html>
+              <head>
+                <style>
+                  /* Define your CSS styles here */
+                  body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                  }
+                  .container {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #ffffff;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                  }
+                  a {
+                    color: #007bff;
+                    text-decoration: none;
+                  }
+                  img {
+                    max-width: 100%; /* Ensure the image fits within its parent container */
+                    height: auto; /* Maintain the aspect ratio */
+                    display: block; /* Remove any extra spacing around the image */
+                    margin: 0 auto; /* Center the image horizontally */
+                  }
+                  .reset-button {
+                      display: block;
+                      padding: 10px 20px;
+                      background-color: #007bff;
+                      color: #fff;
+                      text-decoration: none;
+                      border-radius: 5px;
+                      font-size: 18px;
+                      text-align: center;
+                  }
+                   .reset-button:hover {
+                      background-color: #0056b3;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="container">
+                  <img src="https://i.ibb.co/sHdDQCH/Logo.png" alt="Common Ground" />
+                  <p>Hello ${user.username},</p>
+                  <p>You have requested to reset your password. Please click on the following link to reset your password:</p>
+                  <a class="reset-button" href="${resetLink}">Reset Password</a>
+                  <p>If you didn't request this, you can safely ignore this email.</p>
+                  <p>Best regards,<br />The Common Ground Team</p>
+                </div>
+              </body>
+            </html>
+            `;
+
+        await sendEmail(user.email, subject, body);
+
+        return res.status(200).json({
+            message: 'Email sent successfully',
+        });
+
+    } catch (error) {
+        return res.status(500).json({message: 'Internal server error'});
+    }
+};
