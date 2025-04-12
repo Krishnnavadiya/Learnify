@@ -123,3 +123,46 @@ exports.userLogin = async (req, res, next) => {
     }
 };
 
+exports.userEdit = async (req, res, next) => {
+    try {
+        const user = await Educator.findOne({_id: req.userData.userId}).exec();
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found - Educator'
+            });
+        }
+
+        if (req.file) {
+            if (user.profilePic != null && req.body.username != user.username) {
+                deleteFile.deleteFile(user.profilePic);
+            }
+        }
+        else if (req.body.username != user.username){
+            if (user.profilePic != null)
+            {
+                const oldPath = user.profilePic;
+                const lastIndex = oldPath.lastIndexOf('\\');
+                const pathWithoutFileName = oldPath.slice(0, lastIndex);
+                const newPath = pathWithoutFileName + '\\' + req.body.username + path.extname(oldPath);
+                await fs.rename(oldPath, newPath, function (err) {
+                    if (err) throw err;
+                });
+                user.profilePic = newPath;
+            }
+        }
+        req.body.profilePic = req.file ? req.file.path : user.profilePic;
+
+        await Educator.updateOne({_id: req.userData.userId}, req.body).exec();
+        return res.status(200).json({
+            message: 'Educator updated'
+        });
+    } catch (err) {
+        console.log(err);
+        if (req.file) {
+            deleteFile.deleteFile(req.file.path);
+        }
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
