@@ -166,3 +166,28 @@ exports.userEdit = async (req, res, next) => {
         });
     }
 };
+
+exports.userDelete = async (req, res, next) => {
+    try {
+        const profilePic = await Educator.findOne({email: req.userData.email}).select('profilePic').exec();
+        const result = await Educator.deleteOne({email: req.userData.email}).exec();
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                message: 'Educator not found'
+            });
+        }
+
+        if (profilePic.profilePic) {
+            deleteFile.deleteFile(profilePic.profilePic);
+        }
+        return res.status(200).json({
+            message: 'Educator deleted'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
