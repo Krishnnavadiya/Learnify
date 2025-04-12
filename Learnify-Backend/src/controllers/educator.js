@@ -81,3 +81,45 @@ exports.userSignup = async (req, res, next) => {
         });
     }
 };
+
+exports.userLogin = async (req, res, next) => {
+    try {
+        const user = await Educator.findOne({email: req.body.email}).exec();
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User does not exist - Educator'
+            });
+        }
+
+        const result = await bcrypt.compare(req.body.password, user.password);
+
+        if (result) {
+            const token = jwt.sign(
+                {
+                    email: user.email,
+                    userId: user._id,
+                    userType: 'educator'
+                },
+                process.env.JWT_KEY,
+                {
+                    expiresIn: process.env.JWT_EXPIRES_IN
+                }
+            );
+            return res.status(200).json({
+                message: 'Logged In Successfully - Educator',
+                token: token
+            });
+        } else {
+            return res.status(404).json({
+                message: 'Wrong Password - Educator'
+            });
+        }
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
+
