@@ -237,3 +237,66 @@ exports.deleteCourse = async (req, res, next) => {
         });
     }
 }
+
+exports.sudoDeleteLecture = async (req, res, next) => {
+    try {
+        const courseId = req.params.courseId;
+        const course = await Course.findById(courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        const token = await Token.findOne({token: req.params.token}).exec();
+        if (!token) {
+            return res.status(404).json({
+                message: 'Token not found - Educator'
+            });
+        }
+
+        await Token.deleteOne({token: req.params.token}).exec();
+
+        if (course.discussionForum) {
+            await Discussion.deleteOne({_id: course.discussionForum}).exec();
+        }
+
+        const coursePath = `uploads\\course\\${course.courseCode}-${course.courseTitle}`;
+
+        if (fs.existsSync(coursePath)) {
+            deleteFolder(coursePath);
+        }
+
+        const assignments = course.courseAssignments;
+        await Assignment.deleteMany({_id: {$in: assignments}}).exec();
+
+        const sections = course.courseSections;
+        await Section.deleteMany({_id: {$in: sections}}).exec();
+
+        await Discussion.deleteOne({_id: course.discussionForum}).exec();
+
+        const students = course.enrolledStudents;
+        for (let i = 0; i < students.length; i++) {
+            const student = await Student.findById(students[i]).exec();
+            student.enrolledCourses.pull(courseId);
+            await student.save();
+        }
+
+        const educator = await Educator.findById(req.userData.userId).exec();
+        educator.courseCreated.pull(req.params.courseId);
+        await educator.save();
+
+        await Course.deleteOne({_id: courseId}).exec();
+
+        return res.status(200).json({
+            message: 'Course deleted'
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
