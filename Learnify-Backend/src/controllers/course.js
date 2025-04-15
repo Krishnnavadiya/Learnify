@@ -300,3 +300,42 @@ exports.sudoDeleteLecture = async (req, res, next) => {
         });
     }
 }
+exports.enrollCourse = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+        if (course.visibility === 'private') {
+            return res.status(401).json({
+                message: 'It is a private course'
+            });
+        }
+
+        if (course.enrolledStudents.includes(req.userData.userId)) {
+            return res.status(401).json({
+                message: 'Already enrolled'
+            });
+        }
+
+        course.enrolledStudents.push(req.userData.userId);
+
+        const student = await Student.findById(req.userData.userId).exec();
+        student.enrolledCourses.push(req.params.courseId);
+
+        await course.save();
+        await student.save();
+
+        return res.status(200).json({
+            message: 'Enrolled'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
