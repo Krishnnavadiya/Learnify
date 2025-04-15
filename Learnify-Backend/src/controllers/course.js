@@ -395,3 +395,41 @@ exports.removeStudent = async (req, res, next) => {
         });
     }
 }
+
+exports.rateCourse = async (req, res, next) => {
+    try {
+        const ans = await Course.findOne({_id: req.params.courseId, 'courseFeedback.student': req.userData.userId}).select('courseFeedback').exec();
+        if (ans != null) {
+            return res.status(401).json({
+                message: 'Already rated'
+            });
+        }
+
+        const course = await Course.findById(req.params.courseId).exec();
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.enrolledStudents.includes(req.userData.userId)) {
+            const feedback = {
+                student: req.userData.userId,
+                rating: req.body.rating,
+                comment: req.body.comment
+            };
+
+            course.rating = (course.rating + req.body.rating) / (course.courseFeedback.length + 1);
+            course.courseFeedback.push(feedback);
+            await course.save();
+        }
+        return res.status(200).json({
+            message: 'Rated Successfully'
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
