@@ -339,3 +339,31 @@ exports.enrollCourse = async (req, res, next) => {
         });
     }
 }
+
+exports.unenrollCourse = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        const student = await Student.findById(req.userData.userId).exec();
+        student.enrolledCourses.pull(req.params.courseId);
+        course.enrolledStudents.pull(req.userData.userId);
+
+        await course.save();
+        await student.save();
+
+        return res.status(200).json({
+            message: 'Unenrolled Successfully'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
