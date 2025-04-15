@@ -367,3 +367,31 @@ exports.unenrollCourse = async (req, res, next) => {
         });
     }
 };
+
+exports.removeStudent = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        const student = await Student.findById(req.params.studentId).exec();
+        student.enrolledCourses.pull(req.params.courseId);
+        course.enrolledStudents.pull(req.params.studentId);
+
+        await course.save();
+        await student.save();
+
+        return res.status(200).json({
+            message: 'Student removed'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
