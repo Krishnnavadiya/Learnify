@@ -145,3 +145,95 @@ exports.editCourse = async (req, res, next) => {
         });
     }
 }
+
+exports.deleteCourse = async (req, res, next) => {
+    try {
+        const courseId = req.params.courseId;
+        const course = await Course.findOne({_id: courseId}).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.createdBy.toString() !== req.userData.userId.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        let token = await Token.findOne({userId: req.userData.userId});
+        if (!token) {
+            token = new Token({
+                userId: req.userData.userId,
+                token: crypto.randomBytes(16).toString('hex')
+            });
+            await token.save();
+        }
+
+        const user = await Educator.findOne({email: req.userData.email}).exec();
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            });
+        }
+
+        const subject = `Want to delete your course` + ` [` + `${course.courseTitle}` + `] ?`;
+
+        const body = `
+              <html>
+                <head>
+                  <style>
+                    /* Define your CSS styles here */
+                    body {
+                      font-family: Arial, sans-serif;
+                      background-color: #f4f4f4;
+                    }
+                    .container {
+                      max-width: 600px;
+                      margin: 0 auto;
+                      padding: 20px;
+                      background-color: #ffffff;
+                      border-radius: 5px;
+                      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                    }
+                    a {
+                      color: #007bff;
+                      text-decoration: none;
+                    }
+                    img {
+                      max-width: 100%; /* Ensure the image fits within its parent container */
+                      height: auto; /* Maintain the aspect ratio */
+                      display: block; /* Remove any extra spacing around the image */
+                      margin: 0 auto; /* Center the image horizontally */
+                    }
+                  </style>
+                </head>
+                <body>
+                  <div class="container">
+                    <img src="https://i.ibb.co/sHdDQCH/Logo.png" alt="Common Ground" />
+                    <p>Hello ${user.username},</p>
+                    <p>You have requested to delete your course titled "${course.courseTitle}".</p>
+                    <p>To confirm the deletion, please click on the following link:</p>
+                    <p><a href="https://common-ground.netlify.app/educator/delete-course/${courseId}/${token.token}">Delete course</a></p>
+                    <p>If you didn't request this, you can safely ignore this email.</p>
+                    <p>Best regards,<br />Common Ground</p>
+                  </div>
+                </body>
+              </html>
+            `;
+
+        await sendEmail(req.userData.email, subject, body);
+
+        return res.status(200).json({
+            message: 'Email sent successfully',
+        });
+
+    } catch (err) {
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
