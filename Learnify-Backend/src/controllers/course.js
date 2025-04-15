@@ -528,7 +528,38 @@ exports.getCertificate = async (req, res, next) => {
                 .text(text, x + 60, yPos, { width: width, lineGap: lineSpacing });
         }
 
-       
+        let yPos = 180;
+        addWrappedText(`${formattedDate}`, yPos, 400, 10, 5, fontPath);
+        yPos += doc.heightOfString(`${formattedDate}`, { width: 400 }) + 15;
+
+        addWrappedText(`${student.fname} ${student.lname}`, yPos, 400, 27, 5, fontPath2);
+        yPos += doc.heightOfString(`${student.username}`, { width: 400 }) + 20;
+
+        addWrappedText("has successfully completed", yPos, 400, 12, 5, fontPath);
+        yPos += doc.heightOfString("has successfully completed", { width: 400 }) + 20;
+
+        addWrappedText(`${course.courseCode}` + '-' + `${course.courseTitle}`, yPos, 400, 27, 5, fontPath2);
+        yPos += doc.heightOfString(`${course.courseCode}\` + '-' + \`${course.courseTitle}`, { width: 400 }) + 20;
+
+        addWrappedText(`an online non-credit course authorized by ${educator.fname}` + ' ' + `${educator.lname} and offered through Common Ground.`, yPos, 400, 12, 5, fontPath);
+        yPos += doc.heightOfString(`an online non-credit course authorized by ${educator.fname}` + ' ' + `${educator.lname} and offered through Common Ground.`, { width: 400 }) + 50;
+
+        addWrappedText(`${educator.fname}` + " " + `${educator.lname}`, yPos, 400, 27, 5, fontPath2);
+        doc.text(`${educator.fname}` + " " + `${educator.lname}`, x + 60, yPos, { width: 400, lineGap: 5, underline: true });
+
+        yPos += doc.heightOfString(`${educator.fname}` + " " + `${educator.lname}`, { width: 400 }) + 5;
+
+        doc
+            .font(fontPath)
+            .fontSize(7)
+            .text(`Verify at coursera.org/file/verify/${certificate._id}`, 575, 485);
+
+        doc
+            .font(fontPath)
+            .fontSize(7)
+            .text("Common Ground has confirmed the identity of this individual and their participation in the course.", 575, 500, { width: 200 });
+
+        doc.end();
 
     } catch (err) {
         console.log(err);
