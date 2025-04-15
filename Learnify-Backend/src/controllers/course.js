@@ -433,3 +433,107 @@ exports.rateCourse = async (req, res, next) => {
         });
     }
 }
+
+exports.getCertificate = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        const educator = await Educator.findById(course.createdBy).exec();
+        if (!educator) {
+            return res.status(404).json({
+                message: 'Educator not found'
+            });
+        }
+
+        const student = await Student.findById(req.userData.userId).exec();
+        if (!student) {
+            return res.status(404).json({
+                message: 'Student not found'
+            });
+        }
+
+        let certificate = await Certificate.findOne({course: req.params.courseId, student: req.userData.userId}).exec();
+        if (!certificate) {
+            const assignments = await Assignment.find({
+                course: req.params.courseId,
+                submission: { $ne: [] } // Exclude assignments with empty submissions
+            })
+                .populate({
+                    path: 'submission',
+                    match: { submittedBy: req.userData.userId },
+                })
+                .exec();
+
+            const courseAssignments = course.courseAssignments;
+            if (assignments.length !== courseAssignments.length) {
+                return res.status(401).json({
+                    message: 'Please First Complete All Assignments'
+                });
+            }
+
+            console.log('Certificate not found');
+            certificate = new Certificate({
+                student: req.userData.userId,
+                educator: course.createdBy,
+                course: req.params.courseId,
+            });
+            await certificate.save();
+            await student.certificates.push(certificate._id);
+            await student.save();
+        }
+
+        const dateCreated = certificate.dateCreated;
+        const day = dateCreated.getDate().toString().padStart(2, '0');
+        const month = (dateCreated.getMonth() + 1).toString().padStart(2, '0'); // Month is zero-based
+        const year = dateCreated.getFullYear();
+
+        const formattedDate = `${day}/${month}/${year}`;
+
+        let pdfName = course.courseCode + '-' + course.courseTitle + " Certificate";
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader(
+            'Content-Disposition',
+            'inline; filename="' + pdfName + '.pdf"'
+        );
+
+        // certificate pdf
+        const doc = new PDFDocument({
+            layout: "landscape",
+            size: "A4",
+        });
+
+        // doc.pipe(fs.createWriteStream(`${pdfName}.pdf`));
+        doc.pipe(res);
+
+        const imageWidth = 842;
+        const imageHeight = 595;
+        const x = 0;
+        const y = 0;
+
+        const fontPath = path.join(__dirname, "../../uploads/font/source-serif-pro.regular.ttf");
+        const fontPath2 = path.join(__dirname, "../../uploads/font/Chomsky.ttf");
+
+        const imagePath = path.join(__dirname, "../../uploads/certificate/certificate.jpg");
+        doc.image(imagePath, x, y, { width: imageWidth, height: imageHeight });
+        function addWrappedText(text, yPos, width, fontSize, lineSpacing, font) {
+            doc
+                .font(font)
+                .fontSize(fontSize)
+                .text(text, x + 60, yPos, { width: width, lineGap: lineSpacing });
+        }
+
+       
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
