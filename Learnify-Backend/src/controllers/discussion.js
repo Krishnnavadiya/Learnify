@@ -136,6 +136,29 @@ exports.deleteMessage = async (req, res, next) => {
 
         const message = discussion.messages.id(req.params.messageId);
 
+        if (!message) {
+            return res.status(404).json({
+                message: 'Message not found'
+            });
+        }
+
+        if (req.userData.userType == "student") {
+            if (message.createdByStudent.toString() !== req.userData.userId.toString()) {
+                return res.status(403).json({
+                    message: 'You are not authorized to edit this message'
+                });
+            }
+        }
+        if (req.userData.userType == "educator") {
+            if (message.createdByEducator.toString() !== req.userData.userId.toString()) {
+                return res.status(403).json({
+                    message: 'You are not authorized to edit this message'
+                });
+            }
+        }
+
+        await discussion.messages.pull(req.params.messageId);
+        await discussion.save();
 
         return res.status(200).json({
             message: 'Message deleted'
