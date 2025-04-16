@@ -58,3 +58,59 @@ exports.addMessage = async (req, res, next) => {
         });
     }
 };
+
+exports.editMessage = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (!course.discussionForum) {
+            return res.status(404).json({
+                message: 'This course does not have a discussion forum'
+            });
+        }
+
+        const discussionId = course.discussionForum;
+        const discussion = await Discussion.findById(discussionId).exec();
+
+        const message = discussion.messages.id(req.params.messageId);
+
+        if (!message) {
+            return res.status(404).json({
+                message: 'Message not found'
+            });
+        }
+
+        if (req.userData.userType == "student") {
+            if (message.createdByStudent.toString() !== req.userData.userId.toString()) {
+                return res.status(403).json({
+                    message: 'You are not authorized to edit this message'
+                });
+            }
+        }
+        if (req.userData.userType == "educator") {
+            if (message.createdByEducator.toString() !== req.userData.userId.toString()) {
+                return res.status(403).json({
+                    message: 'You are not authorized to edit this message'
+                });
+            }
+        }
+
+        message.message = req.body.message;
+        await discussion.save();
+
+        return res.status(200).json({
+            message: 'Message edited'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
