@@ -114,3 +114,36 @@ exports.editMessage = async (req, res, next) => {
         });
     }
 };
+
+exports.deleteMessage = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (!course.discussionForum) {
+            return res.status(404).json({
+                message: 'This course does not have a discussion forum'
+            });
+        }
+
+        const discussionId = course.discussionForum;
+        const discussion = await Discussion.findById(discussionId).exec();
+
+        const message = discussion.messages.id(req.params.messageId);
+
+
+        return res.status(200).json({
+            message: 'Message deleted'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
