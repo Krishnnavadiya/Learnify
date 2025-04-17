@@ -60,3 +60,41 @@ exports.createAssignment = async (req, res, next) => {
         });
     }
 }
+
+// exports.editAssignment = async (req, res, next) => {
+//     try {
+//         const assignment = await Assignment.findById(req.params.assignmentId).exec();
+//
+//         if (!assignment) {
+//             return res.status(404).json({
+//                 message: 'Assignment not found'
+//             });
+//         }
+//
+//         let oldThumbLink = course.thumbnail;
+//         const newFolderName = `${req.body.courseCode}-${req.body.courseTitle}`;
+//         const newPath = path.join(__dirname, `../../uploads/course/${newFolderName}`);
+//         console.log(newPath);
+//
+//         if (req.file && oldThumbLink != null) {
+//             oldThumbLink = newPath + '/' + path.basename(oldThumbLink);
+//             console.log(oldThumbLink);
+//             deleteFile(oldThumbLink);
+//         }
+//
+//         const updateData = req.body;
+//
+//         await Course.updateOne({_id: courseId}, {$set: updateData}).exec();
+//
+//         return res.status(200).json({
+//             message: 'Course updated'
+//         });
+//
+//     } catch (err) {
+//         console.log(err);
+//
+//         return res.status(500).json({
+//             error: err
+//         });
+//     }
+// }
