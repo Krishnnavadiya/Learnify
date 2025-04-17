@@ -239,3 +239,29 @@ exports.getCourses = async (req, res, next) => {
     }
 };
 
+exports.getEnrolledCourse = async (req, res, next) => {
+    try {
+        const enrolledStudent = await Student.findById(req.userData.userId)
+            .populate({
+                path: 'enrolledCourses',
+                select: '_id courseTitle courseDescription coursePrice courseLevel enrolledStudents courseCode language rating createdBy',
+                populate: {
+                    path: 'createdBy',
+                    select: 'fname lname',
+                },
+            })
+            .exec();
+
+        const enrolledCourses = enrolledStudent.enrolledCourses;
+
+        return res.status(200).json({
+            courses: enrolledCourses,
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
+
