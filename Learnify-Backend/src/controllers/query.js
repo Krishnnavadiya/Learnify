@@ -265,3 +265,111 @@ exports.getEnrolledCourse = async (req, res, next) => {
     }
 }
 
+exports.getCourse = async (req, res, next) => {
+    try {
+        let course;
+        if (req.userData.userType == "educator") {
+            if (!await Course.findOne({_id: req.params.courseId, createdBy: req.userData.userId})) {
+                return res.status(401).json({
+                    message: 'You are not authorized to access this course'
+                });
+            }
+            course = await Course.findById({_id: req.params.courseId, visibility: 'public'})
+                .select('_id courseTitle courseDescriptionLong coursePrice courseLevel courseCode courseSections courseAssignments language prerequisites rating courseFeedback discussionForum enrolledStudents createdBy dateCreated')
+                .populate('courseSections')
+                .populate({
+                    path: 'courseAssignments',
+                    populate: {
+                        path: 'submission',
+                        model: 'Submission',
+                        select: 'submission grade gradedBy dateSubmitted',
+                        populate: {
+                            path: 'submittedBy',
+                            model: 'Student',
+                            select: 'username',
+                        }
+                    }
+                })
+                .populate({
+                    path: 'enrolledStudents',
+                    model: 'Student',
+                    select: 'username',
+                })
+                .populate({
+                    path: 'discussionForum',
+                    populate: {
+                        path: 'messages.createdByEducator',
+                        model: 'Educator',
+                        select: 'fname lname',
+                    },
+                })
+                .populate({
+                    path: 'discussionForum',
+                    populate: {
+                        path: 'messages.createdByStudent',
+                        model: 'Student',
+                        select: 'fname lname',
+                    },
+                })
+                .populate('createdBy', 'fname lname')
+                .exec();
+        } else if (req.userData.userType == "student") {
+            course = await Course.findById({_id: req.params.courseId, visibility: 'public'})
+                .select('_id courseTitle courseDescriptionLong coursePrice courseLevel courseCode courseSections courseAssignments language prerequisites rating courseFeedback discussionForum enrolledStudents createdBy dateCreated')
+                .populate('courseSections')
+                .populate({
+                    path: 'courseAssignments',
+                    populate: {
+                        path: 'submission',
+                        match: {'submittedBy': req.userData.userId},
+                        model: 'Submission',
+                        select: 'submission grade gradedBy dateSubmitted',
+                        populate: {
+                            path: 'submittedBy',
+                            model: 'Student',
+                            select: 'username',
+                        }
+                    }
+                })
+                .populate({
+                    path: 'enrolledStudents',
+                    model: 'Student',
+                    select: 'username',
+                })
+                .populate({
+                    path: 'discussionForum',
+                    populate: {
+                        path: 'messages.createdByEducator',
+                        model: 'Educator',
+                        select: 'fname lname',
+                    },
+                })
+                .populate({
+                    path: 'discussionForum',
+                    populate: {
+                        path: 'messages.createdByStudent',
+                        model: 'Student',
+                        select: 'fname lname',
+                    },
+                })
+                .populate('createdBy', 'fname lname')
+                .exec();
+
+        }
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        return res.status(200).json({
+            course: course
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
+
