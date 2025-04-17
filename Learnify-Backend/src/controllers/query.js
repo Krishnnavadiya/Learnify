@@ -145,3 +145,43 @@ exports.searchFilter = async (req, res, next) => {
 }
 
 
+exports.getDashboard = async (req, res, next) => {
+    try {
+        if (req.userData.userType != "educator") {
+            return res.status(401).json({
+                message: 'This is not an educator account'
+            });
+        }
+
+        const courses = await Course.find({createdBy: req.userData.userId}).exec();
+
+        // total Earning
+        let totalEarning = 0;
+        let totalStudent = 0;
+        let totalCourses = courses.length;
+        for (let i = 0; i < courses.length; i++) {
+            totalEarning += courses[i].coursePrice * courses[i].enrolledStudents.length;
+            totalStudent += courses[i].enrolledStudents.length;
+            console.log(totalEarning, courses[i].coursePrice, courses[i].enrolledStudents.length);
+        }
+
+        let rate = 0;
+        for (let i = 0; i < courses.length; i++) {
+            rate += courses[i].rating;
+        }
+        let avgRating = rate / courses.length;
+        return res.status(200).json({
+            totalEarning: totalEarning,
+            totalStudent: totalStudent,
+            totalCourses: totalCourses,
+            avgRating: avgRating
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
+
