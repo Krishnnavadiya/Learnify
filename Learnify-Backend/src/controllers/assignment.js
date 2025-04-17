@@ -145,3 +145,48 @@ exports.deleteAssignment = async (req, res, next) => {
         });
     }
 };
+
+exports.gradeAssignment = async (req, res, next) => {
+    try {
+        if (req.userData.userType !== 'educator') {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const assignment = await Assignment.findById(req.params.assignmentId).exec();
+        if (!assignment) {
+            return res.status(404).json({
+                message: 'Assignment not found'
+            });
+        }
+
+        const course = await Course.findById(assignment.course).exec();
+        const educator = await Educator.findById(req.userData.userId).exec();
+
+        if (educator._id.toString() !== course.createdBy.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const submission = await Submission.findById(req.params.submissionId).exec();
+        if (!submission) {
+            return res.status(404).json({
+                message: 'Submission not found'
+            });
+        }
+
+        submission.grade = req.body.grade;
+        submission.gradedBy = req.userData.userId;
+        await submission.save();
+
+        return res.status(200).json({
+            message: 'Assignment graded'
+        });
+    } catch (err) {
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
