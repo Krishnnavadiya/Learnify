@@ -14,3 +14,60 @@ const Submission = require('../models/submission');
 const sendEmail = require("../../utils/sendEmail");
 const {deleteFile, deleteFolder} = require("../../utils/deleteFile");
 
+
+exports.submitSubmission = async (req, res, next) => {
+    try {
+        const assignment = await Assignment.findById(req.params.assignmentId);
+        if (!assignment) {
+            return res.status(404).json({
+                message: "Assignment not found"
+            });
+        }
+
+        if (assignment.dueDate < Date.now()) {
+            return res.status(401).json({
+                message: "Assignment submission time is over"
+            });
+        }
+
+        const course = await Course.findById(assignment.course);
+        if (!course) {
+            return res.status(404).json({
+                message: "Course not found"
+            });
+        }
+
+        if (!course.enrolledStudents.includes(req.userData.userId)) {
+            return res.status(401).json({
+                message: "You are not enrolled in this course"
+            });
+        }
+
+        const attachment = req.files.map(file => file.path);
+        const submission = new Submission({
+            assignment: assignment._id,
+            submittedBy: req.userData.userId,
+            submission: attachment,
+        });
+
+        await submission.save();
+
+        await assignment.submission.push(submission._id);
+        await assignment.save();
+
+        return res.status(201).json({
+            message: "Submission successful",
+            submission: submission
+        });
+    } catch (err) {
+        console.error(err);
+        if (req.files) {
+            req.files.forEach(file => {
+                deleteFile(file.path);
+            });
+        }
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+}
