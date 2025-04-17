@@ -373,3 +373,79 @@ exports.getCourse = async (req, res, next) => {
     }
 }
 
+exports.getRecommendedCourse = async (req, res, next) => {
+    try {
+        const courses = await Course.aggregate([
+            {
+                $match: {
+                    enrolledStudents: {$exists: true, $ne: []},
+                },
+            },
+            {
+                $project: {
+                    courseTitle: 1,
+                    courseDescription: 1,
+                    coursePrice: 1,
+                    courseLevel: 1,
+                    courseCode: 1,
+                    language: 1,
+                    rating: 1,
+                    enrolledStudents: 1,
+                    ratio: {$multiply: [{$size: '$enrolledStudents'}, '$rating']},
+                    createdBy: 1, // Include the createdBy field to be used for $lookup
+                },
+            },
+            {
+                $sort: {ratio: -1},
+            },
+            {
+                $limit: 5,
+            },
+            {
+                $lookup: {
+                    from: 'educators', // Replace 'educators' with the actual collection name where educators are stored
+                    localField: 'createdBy',
+                    foreignField: '_id',
+                    as: 'educator',
+                },
+            },
+            {
+                $unwind: '$educator', // Convert the 'educator' array to an object
+            },
+            {
+                $project: {
+                    _id: 1,
+                    courseTitle: 1,
+                    courseDescription: 1,
+                    coursePrice: 1,
+                    courseLevel: 1,
+                    courseCode: 1,
+                    language: 1,
+                    rating: 1,
+                    ratio: 1,
+                    enrolledStudents: 1,
+                    createdBy: {
+                        fname: '$educator.fname',
+                        lname: '$educator.lname',
+                    },
+                },
+            },
+        ]);
+
+
+        if (!courses) {
+            return res.status(404).json({
+                message: 'No courses found'
+            });
+        }
+
+        return res.status(200).json({
+            courses: courses
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
