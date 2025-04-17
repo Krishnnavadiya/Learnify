@@ -220,3 +220,22 @@ exports.getProfile = async (req, res, next) => {
     }
 };
 
+exports.getCourses = async (req, res, next) => {
+    try {
+        const courses = await Course.find({visibility: "public"}).select('_id courseTitle courseDescription coursePrice courseLevel courseCode language prerequisites').exec();
+        if (!courses) {
+            return res.status(404).json({
+                message: 'No courses found'
+            });
+        }
+        return res.status(200).json({
+            courses: courses
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
+
