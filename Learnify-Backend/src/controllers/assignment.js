@@ -98,3 +98,50 @@ exports.createAssignment = async (req, res, next) => {
 //         });
 //     }
 // }
+
+exports.deleteAssignment = async (req, res, next) => {
+    try {
+        if (req.userData.userType !== 'educator') {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const assignment = await Assignment.findById(req.params.assignmentId).exec();
+        if (!assignment) {
+            return res.status(404).json({
+                message: 'Assignment not found'
+            });
+        }
+
+        const course = await Course.findById(assignment.course).exec();
+        const educator = await Educator.findById(req.userData.userId).exec();
+
+        if (educator._id.toString() !== course.createdBy.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const assignmentDirectory = path.join(`./uploads/course/${course.courseCode}-${course.courseTitle}/assignments`);
+        const assignmentTitle = assignment.title;
+        const assignmentPath = path.join(assignmentDirectory, assignmentTitle);
+
+        if (fs.existsSync(assignmentPath)) {
+            deleteFolder(assignmentPath);
+        }
+
+        course.courseAssignments.pull(req.params.assignmentId);
+        await course.save();
+
+        await Assignment.deleteOne({_id: req.params.assignmentId}).exec();
+
+        return res.status(200).json({
+            message: 'Assignment deleted'
+        });
+    } catch (err) {
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
