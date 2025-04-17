@@ -71,3 +71,58 @@ exports.submitSubmission = async (req, res, next) => {
         });
     }
 }
+
+exports.deleteSubmission = async (req, res, next) => {
+    try {
+        const submission = await Submission.findById(req.params.submissionId);
+        if (!submission) {
+            return res.status(404).json({
+                message: "Submission not found"
+            });
+        }
+
+        const assignment = await Assignment.findById(submission.assignment);
+        if (!assignment) {
+            return res.status(404).json({
+                message: "Assignment not found"
+            });
+        }
+
+        const course = await Course.findById(assignment.course);
+        if (!course) {
+            return res.status(404).json({
+                message: "Course not found"
+            });
+        }
+
+        if (!course.enrolledStudents.includes(req.userData.userId)) {
+            return res.status(401).json({
+                message: "You are not enrolled in this course"
+            });
+        }
+
+        if (submission.submittedBy.toString() !== req.userData.userId) {
+            return res.status(401).json({
+                message: "You are not authorized to delete this submission"
+            });
+        }
+
+        if (fs.existsSync(submission.submission.toString())) {
+            deleteFile(submission.submission.toString());
+        }
+
+        await assignment.submission.pull(submission._id);
+        await assignment.save();
+
+        await Submission.deleteOne({ _id: req.params.submissionId });
+
+        return res.status(200).json({
+            message: "Submission deleted successfully"
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+}
