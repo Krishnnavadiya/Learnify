@@ -449,3 +449,32 @@ exports.getRecommendedCourse = async (req, res, next) => {
         });
     }
 }
+
+exports.generateGraph = async (req, res, next) => {
+    try {
+        //     sort by latest created date
+
+        const courses = await Course.find({createdBy: req.userData.userId}).sort({dateCreated: -1}).exec();
+        if (!courses) {
+            return res.status(404).json({
+                message: 'No courses found'
+            });
+        }
+
+        let labels = [];
+        let data = [];
+        for (let i = 0; i < courses.length; i++) {
+            labels.push(courses[i].courseTitle);
+            data.push(courses[i].enrolledStudents.length);
+        }
+        return res.status(200).json({
+            courseTitle: labels,
+            enrolled: data
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
