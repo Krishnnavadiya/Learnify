@@ -44,3 +44,104 @@ exports.getCourseByEducator = async (req, res, next) => {
     }
 }
 
+exports.searchFilter = async (req, res, next) => {
+    try {
+        let filters = {
+            visibility: "public"
+        };
+
+        if (req.query.title) {
+            filters.courseTitle = {$regex: new RegExp(req.query.title, 'i')};
+        }
+        if (req.query.price) {
+            filters.coursePrice = {$lte: req.query.price};
+        }
+        if (req.query.tag) {
+            const tags = req.query.tag.split(',');
+            filters.tags = {$in: tags};
+        }
+        if (req.query.level) {
+            filters.courseLevel = req.query.level;
+        }
+        if (req.query.language) {
+            filters.language = req.query.language;
+        }
+        // if (req.query.prerequisites) {
+        //     const prerequisites = req.query.prerequisites.split(',');
+        //     filters.prerequisites = { $in: prerequisites };
+        // }
+        if (req.query.rating) {
+            filters.rating = {$gte: req.query.rating};
+        }
+        if (req.query.courseCode) {
+            filters.courseCode = {$regex: new RegExp(req.query.courseCode, 'i')};
+        }
+
+        const courses = await Course.find(filters)
+            .select('_id courseTitle courseDescription coursePrice courseLevel courseCode language rating createdBy')
+            .populate('createdBy', 'fname lname')
+            .exec();
+
+        if (req.headers.authorization) {
+            const token = req.headers.authorization.split(" ")[1];
+            const decoded = jwt.verify(token, process.env.JWT_KEY);
+
+            if (decoded.userType === "student") {
+                const newCourses = await Course.aggregate([
+                    {
+                        $match: filters,
+                    },
+                    {
+                        $addFields: {
+                            isEnrolled: {$in: [decoded.userId, '$enrolledStudents']},
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: 'educators',
+                            localField: 'createdBy',
+                            foreignField: '_id',
+                            as: 'educator',
+                        },
+                    },
+                    {
+                        $unwind: '$educator',
+                    },
+                    {
+                        $project: {
+                            _id: 1,
+                            courseTitle: 1,
+                            courseDescription: 1,
+                            coursePrice: 1,
+                            courseLevel: 1,
+                            courseCode: 1,
+                            language: 1,
+                            rating: 1,
+                            enrolledStudents: 1,
+                            createdBy: {
+                                fname: '$educator.fname',
+                                lname: '$educator.lname',
+                            },
+                            isEnrolled: 1,
+                        },
+                    },
+                ]);
+
+                return res.status(200).json({
+                    courses: newCourses
+                });
+            }
+        }
+
+        return res.status(200).json({
+            courses: courses
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+}
+
+
