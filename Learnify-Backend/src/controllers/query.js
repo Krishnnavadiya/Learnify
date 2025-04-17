@@ -185,3 +185,38 @@ exports.getDashboard = async (req, res, next) => {
     }
 }
 
+exports.getProfile = async (req, res, next) => {
+    try {
+        if (req.userData.userType == "educator") {
+            //     select fname, lname, gender, location, dob, username, phone, email, upiID, bio, profilePic
+            const educator = await Educator.findById(req.userData.userId).select('fname lname gender location dob username phone email upiID bio profilePic').exec();
+            if (!educator) {
+                return res.status(404).json({
+                    message: 'Educator not found'
+                });
+            }
+            return res.status(200).json({
+                educator: educator
+            });
+        } else if (req.userData.userType == "student") {
+            const student = await Student.findById(req.userData.userId).select('fname lname gender dob username phone email bio profilePic interests').exec();
+            if (!student) {
+                return res.status(404).json({
+                    message: 'Student not found'
+                });
+            }
+            return res.status(200).json({
+                student: student
+            });
+        }
+        return res.status(404).json({
+            message: 'User not found'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
+
