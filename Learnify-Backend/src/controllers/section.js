@@ -48,3 +48,62 @@ exports.createSection = async (req, res, next) => {
     }
 };
 
+exports.editSection = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.createdBy.toString() !== req.userData.userId.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const section = await Section.findById(req.params.sectionId).exec();
+        if (!section) {
+            return res.status(404).json({
+                message: 'Section not found'
+            });
+        }
+        const oldDirectoryName = course.courseCode + '-' + course.courseTitle + '/' + section.title + '-' + req.params.sectionId;
+        const newDirectoryName = course.courseCode + '-' + course.courseTitle + '/' + req.body.title + '-' + req.params.sectionId;
+
+        const courseDirectory = path.join('./uploads/course', oldDirectoryName);
+        const newCourseDirectory = path.join('./uploads/course', newDirectoryName);
+
+        if (fs.existsSync(courseDirectory)) {
+            fs.renameSync(courseDirectory, newCourseDirectory);
+            console.log('Directory already exists and renamed');
+        }
+
+        for (let i = 0; i < section.posts.length; i++) {
+            for (let j = 0; j < section.posts[i].attachments.length; j++) {
+                let filePath = section.posts[i].attachments[j];
+                filePath = filePath.replace(section.title, req.body.title);
+                section.posts[i].attachments[j] = filePath;
+            }
+        }
+
+        await section.save();
+
+        const updateData = req.body;
+
+        await Section.updateOne({_id: req.params.sectionId}, {$set: updateData}).exec();
+
+        return res.status(201).json({
+            message: 'Section edited',
+            section: section
+        });
+    } catch
+        (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
+
