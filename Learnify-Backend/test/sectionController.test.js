@@ -491,3 +491,99 @@ describe('Section Controller - editPost', () => {
     });
 });
 
+describe('Section Controller - deletePost', () => {
+    it('should not delete a post in a section if course does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const res1 = await request(app)
+            .delete(`/educator/delete-post/123456789012345678901234/123456789012345678901234/123456789012345678901234`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('should not delete a post in a section if section does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const res1 = await request(app)
+            .delete(`/educator/delete-post/${course._id}/123456789012345678901234/123456789012345678901234`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Section not found');
+    });
+    it('should not delete a post in a section if post does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const res1 = await request(app)
+            .delete(`/educator/delete-post/${course._id}/${course.courseSections[0]._id}/123456789012345678901234`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Post not found');
+    });
+    it('should not delete a post in a section if user is not the creator of the course', async () => {
+        const educator1 = {
+            email: 'testeduc1ator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const res1 = await request(app)
+            .delete(`/educator/delete-post/${course._id}/${course.courseSections[0]._id}/${course.courseSections[0].posts[0]._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.statusCode).to.equal(401);
+        expect(res1.body.message).to.equal('Unauthorized');
+    });
+    it('should delete a post in a section', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const res1 = await request(app)
+            .delete(`/educator/delete-post/${course._id}/${course.courseSections[0]._id}/${course.courseSections[0].posts[0]._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Post deleted');
+    });
+});
