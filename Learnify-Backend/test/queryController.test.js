@@ -34,3 +34,50 @@ describe('Query Controller - getAllCourses', () => {
     });
 });
 
+describe('Query Controller - getCourseByEducator', () => {
+    it('should return all courses by educator', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const res2 = await request(app)
+            .get('/query/coursebyeducator')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body).to.have.property('courses');
+    });
+    it('should return 401 if not logged in', async () => {
+        const res = await request(app)
+            .get('/query/coursebyeducator')
+            .send();
+
+        expect(res.statusCode).to.equal(401);
+        expect(res.body.message).to.equal('Invalid token');
+    });
+    it('should return 404 if educator does not have any courses', async () => {
+        const educator = {
+            email: 'testeduc1ator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const res2 = await request(app)
+            .get('/query/coursebyeducator')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body.courses).to.be.an('array').that.is.empty;
+    });
+});
+
