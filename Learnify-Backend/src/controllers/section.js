@@ -267,3 +267,54 @@ exports.editPost = async (req, res, next) => {
     }
 }
 
+exports.deletePost = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.createdBy.toString() !== req.userData.userId.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const section = await Section.findById(req.params.sectionId).exec();
+        if (!section) {
+            return res.status(404).json({
+                message: 'Section not found'
+            });
+        }
+
+        const post = section.posts.id(req.params.postId);
+
+        if (!post) {
+            return res.status(404).json({
+                message: 'Post not found'
+            });
+        }
+
+        const postPath = `uploads/course/${course.courseCode}-${course.courseTitle}/${section.title}-${req.params.sectionId}/${post.title}`;
+        if (fs.existsSync(postPath)) {
+            deleteFolder(postPath);
+        }
+
+        await section.posts.pull(req.params.postId);
+
+        await section.save();
+
+        return res.status(200).json({
+            message: 'Post deleted'
+        });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
+
