@@ -23,3 +23,128 @@ afterAll(async () => {
     await mongoose.disconnect();
 });
 
+describe('Course Controller - createCourse', () => {
+    it('educator should be able create a new course', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body.message).to.equal('Logged In Successfully - Educator');
+        expect(res.body.token).to.not.equal(null);
+
+        const course = {
+            courseTitle: 'Test Course',
+            courseDescription: 'This is a test course.',
+            courseDescriptionLong: 'A longer description of the test course.',
+            coursePrice: 19.99,
+            tags: ['Programming', 'Testing'],
+            courseLevel: 'Beginner',
+            courseCode: 'TEST123',
+            language: 'English',
+            visibility: 'public',
+            prerequisites: 'Basic knowledge of programming',
+            discussionForum: 'true', // Set to 'true' if you want to enable the discussion forum
+        };
+        const imagePath = path.join(__dirname, 'images.png'); // Replace with the actual path to your educator's profile picture
+        const profilePic = fs.readFileSync(imagePath);
+
+        const res2 = await request(app)
+            .post('/educator/create-course')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .field('courseTitle', course.courseTitle)
+            .field('courseDescription', course.courseDescription)
+            .field('courseDescriptionLong', course.courseDescriptionLong)
+            .field('coursePrice', course.coursePrice)
+            .field('tags', course.tags)
+            .field('courseLevel', course.courseLevel)
+            .field('courseCode', course.courseCode)
+            .field('language', course.language)
+            .field('visibility', course.visibility)
+            .field('prerequisites', course.prerequisites)
+            .field('discussionForum', course.discussionForum)
+            .attach('thumbnail', profilePic, 'profilePic.png');
+
+
+        expect(res2.statusCode).to.equal(201);
+        expect(res2.body.message).to.equal('Course created');
+    });
+    it('student should not be able to create a new course', async () => {
+        const educator = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body.message).to.equal('Logged In Successfully - Student');
+        expect(res.body.token).to.not.equal(null);
+
+        const course = {
+            courseTitle: 'Test Course',
+            courseDescription: 'This is a test course.',
+            courseDescriptionLong: 'A longer description of the test course.',
+            coursePrice: 19.99,
+            tags: ['Programming', 'Testing'],
+            courseLevel: 'Beginner',
+            courseCode: 'TEST123',
+            language: 'English',
+            visibility: 'public',
+            prerequisites: 'Basic knowledge of programming',
+            discussionForum: 'true', // Set to 'true' if you want to enable the discussion forum
+        };
+
+        const res2 = await request(app)
+            .post('/educator/create-course')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send(course);
+
+        expect(res2.statusCode).to.equal(401);
+        expect(res2.body.message).to.equal('Unauthorized');
+    });
+    it('educator cannot create a course with the same course code', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body.message).to.equal('Logged In Successfully - Educator');
+        expect(res.body.token).to.not.equal(null);
+
+        const course = {
+            courseTitle: 'Test Course',
+            courseDescription: 'This is a test course.',
+            courseDescriptionLong: 'A longer description of the test course.',
+            coursePrice: 19.99,
+            tags: ['Programming', 'Testing'],
+            courseLevel: 'Beginner',
+            courseCode: 'TEST123',
+            language: 'English',
+            visibility: 'public',
+            prerequisites: 'Basic knowledge of programming',
+            discussionForum: 'true', // Set to 'true' if you want to enable the discussion forum
+        };
+
+        const res2 = await request(app)
+            .post('/educator/create-course')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send(course);
+
+        expect(res2.statusCode).to.equal(409);
+        expect(res2.body.message).to.equal('Course code already exists');
+    });
+});
+
