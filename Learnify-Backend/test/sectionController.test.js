@@ -23,3 +23,70 @@ afterAll(async () => {
     await mongoose.disconnect();
 });
 
+describe('Section Controller - createSection', () => {
+    it('should create a new section', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        }
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const res1 = await request(app)
+            .post(`/educator/create-section/${educator.courseCreated[0]}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({
+                title: 'testSection',
+            })
+
+        expect(res1.statusCode).to.equal(201);
+        expect(res1.body.message).to.equal('Section created');
+    });
+    it('should not create a new section if course does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        }
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const res1 = await request(app)
+            .post(`/educator/create-section/123456789012345678901234`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({
+                title: 'testSection',
+            })
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('should not create a new section if user is not the creator of the course', async () => {
+        const educator1 = {
+            email: 'testeduc1ator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+
+        const res1 = await request(app)
+            .post(`/educator/create-section/${educator.courseCreated[0]}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({
+                title: 'testSection',
+            })
+
+        expect(res1.statusCode).to.equal(401);
+        expect(res1.body.message).to.equal('Unauthorized');
+    });
+});
+
