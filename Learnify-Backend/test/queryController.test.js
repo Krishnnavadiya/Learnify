@@ -81,3 +81,45 @@ describe('Query Controller - getCourseByEducator', () => {
     });
 });
 
+describe('Query Controller - getDashboard', () => {
+    it('should not return dashboard if it is not an educator', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const res2 = await request(app)
+            .get('/query/dashboard')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(401);
+        expect(res2.body.message).to.equal('This is not an educator account');
+    });
+    it('should return dashboard if it is an educator', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const res2 = await request(app)
+            .get('/query/dashboard')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body).to.have.property('totalEarning');
+        expect(res2.body).to.have.property('totalStudent');
+        expect(res2.body).to.have.property('totalCourses');
+        expect(res2.body).to.have.property('avgRating');
+    });
+});
+
