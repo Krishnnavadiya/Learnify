@@ -262,3 +262,24 @@ describe('Query Controller - getEnrolledCourses', () => {
     });
 });
 
+describe('Query Controller - getRecommendedCourses', () => {
+    it('should return recommended courses', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        let res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        res = await request(app)
+            .get('/query/recommended-course')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('courses');
+    });
+});
+
