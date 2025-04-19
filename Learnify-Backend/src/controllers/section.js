@@ -148,3 +148,49 @@ exports.deleteSection = async (req, res, next) => {
         });
     }
 }
+exports.addPost = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.createdBy.toString() !== req.userData.userId.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const section = await Section.findById(req.params.sectionId).exec();
+        if (!section) {
+            return res.status(404).json({
+                message: 'Section not found'
+            });
+        }
+
+        const attachments = req.files.map(file => file.path);
+        const post = {
+            title: req.body.title,
+            body: req.body.body,
+            attachments: attachments
+        };
+
+        section.posts.push(post);
+        await section.save();
+
+        return res.status(201).json({
+            message: 'Post added',
+            post: post
+        });
+
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+};
+
