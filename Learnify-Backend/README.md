@@ -1,9 +1,7 @@
-![Common Ground (1000 × 500 px)](https://github.com/Jaysanghani08/Common_Ground/assets/94957904/0c79050a-ab46-47ab-856c-f26909c185df)
-
-# Common Ground Backend API
+# Learnify Backend API
 
 ## Overview
-**Common Ground** is a collaborative educational platform designed for educators and students to explore, share, and organize resources aligned with the Common Core Standards. This repository houses the **Node.js backend API**, which handles all authentication, course management, certificate generation, and more.
+**Learnify** is a collaborative educational platform designed for educators and students to explore, share, and organize resources aligned with the Common Core Standards. This repository houses the **Node.js backend API**, which handles all authentication, course management, certificate generation, and more.
 
 ---
 
@@ -23,7 +21,7 @@
 
 ## Project Structure
 ```
-Common_Ground-Backend/
+Learnify-Backend/
 │
 ├── api/
 │   ├── controllers/       # Logic for routes
@@ -67,12 +65,12 @@ RAZORPAY_SECRET_KEY = your_razorpay_secret
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/Jaysanghani08/Common_Ground.git
+   git clone https://github.com/Krishnnavadiya/Learnify
    ```
 
 2. **Navigate to Backend Directory**
    ```bash
-   cd Common_Ground/Common_Ground-Backend
+   cd Learnify/Learnify-Backend
    ```
 
 3. **Install Dependencies**
@@ -167,46 +165,18 @@ RAZORPAY_SECRET_KEY = your_razorpay_secret
 ---
 
 ## Course Info  
-**Course:** IT314 Software Engineering  
-**Professor:** Saurabh Tiwari  
-**Mentor:** Khushi D  
-**Group Number:** 16
+**Course:** IT632 Software Engineering  
+**Professor:** Jayprakash Lalchandani  
+**Mentor:** Sarthak , Tilak and Yash  
+**Group Number:** 28
 
 ---
 
 ## 👥 Group Members
-- [@Jay Sabva](https://www.github.com/JaySabva)
-- [@Jay Sanghani](https://www.github.com/Jaysanghani08/)
-- [@Ashish Parmar](https://www.github.com/Ashishparmar3511) 
-- [@Param Patel](https://www.github.com/P-a-r-a-m)
-- _(Add others here if applicable)_
-
+- [@Krishn Navadiya](https://github.com/Krishnnavadiya)
+- [@Smit Kachhadiya](https://github.com/Krishnnavadiya)
+- [@Parth Limbachiya](https://github.com/Krishnnavadiya)
+  
 ---
 
-## 📁 Project Work
-- 📖 [User Stories](https://github.com/Jaysanghani08/Common_Ground/blob/main/User_Stories/User_Stories.pdf)
-- 🧠 [Concept Map](https://github.com/Jaysanghani08/Common_Ground/blob/main/Concept_map/Concept_Map.pdf)
-- 🗺️ Activity Diagram:
-  - [Diagram](https://github.com/Jaysanghani08/Common_Ground/blob/main/Activity_diagram/Activity_Diagram.pdf)
-  - [Description](https://github.com/Jaysanghani08/Common_Ground/blob/main/Activity_diagram/Activity_Diagram_Description.pdf)
-
----
-
-## 📂 Backend Source
-- [server.js](https://github.com/Jaysanghani08/Common_Ground/blob/main/BackEnd/server.js)
-- [app.js](https://github.com/Jaysanghani08/Common_Ground/tree/main/BackEnd/app.js)
-- [API Directory](https://github.com/Jaysanghani08/Common_Ground/tree/main/BackEnd/api/)
-  - [routes](https://github.com/Jaysanghani08/Common_Ground/tree/main/BackEnd/api/routes)
-  - [controllers](https://github.com/Jaysanghani08/Common_Ground/tree/main/BackEnd/api/controllers)
-  - [middleware](https://github.com/Jaysanghani08/Common_Ground/tree/main/BackEnd/api/middleware)
-  - [models](https://github.com/Jaysanghani08/Common_Ground/tree/main/BackEnd/api/models)
-- [config.env](https://github.com/Jaysanghani08/Common_Ground/blob/main/BackEnd/config.env)
-
----
-
-## 📬 Postman Testing
-- [Postman Collection](https://www.postman.com/jaysabva/workspace/common-ground/collection/29100795-f050ae57-b6d0-4d13-a547-90435b1845d7?action=share&creator=29100795)
-
----
-
-> _This README provides all essential backend documentation for developers and collaborators contributing to Common Ground. For front-end documentation or deployment details, refer to the respective folders in the main repository._
+> _This README provides all essential backend documentation for developers and collaborators contributing to Learnify. For front-end documentation or deployment details, refer to the respective folders in the main repository._
