@@ -107,3 +107,44 @@ exports.editSection = async (req, res, next) => {
     }
 }
 
+exports.deleteSection = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.createdBy.toString() !== req.userData.userId.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const section = await Section.findById(req.params.sectionId).exec();
+        if (!section) {
+            return res.status(404).json({
+                message: 'Section not found'
+            });
+        }
+        const sectionPath = `uploads/course/${course.courseCode}-${course.courseTitle}/${section.title}-${req.params.sectionId}`;
+
+        if (fs.existsSync(sectionPath)){
+            deleteFolder(sectionPath);
+        }
+
+        await Course.updateOne({_id: req.params.courseId}, {$pull: {courseSections: req.params.sectionId}}).exec();
+
+        await Section.deleteOne({_id: req.params.sectionId}).exec();
+        return res.status(201).json({
+            message: 'Section deleted'
+        });
+    } catch
+        (err) {
+        console.log(err);
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
