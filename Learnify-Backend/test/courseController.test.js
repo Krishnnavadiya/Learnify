@@ -433,3 +433,51 @@ describe('Course Controller - enrollCourse', () => {
     });
 });
 
+describe('Course Controller - unenrollCourse', () => {
+    it('student should be able to unenroll from a course', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const course = await Course.findOne({});
+        const res1 = await request(app)
+            .post(`/student/enroll/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        if (res1.statusCode === 200) {
+            const res2 = await request(app)
+                .post(`/student/unroll/${course._id}`)
+                .set('Authorization', 'Bearer ' + res.body.token)
+                .send({});
+
+            expect(res2.statusCode).to.equal(200);
+            expect(res2.body.message).to.equal('Unenrolled Successfully');
+        }
+    });
+    it('if course does not exist, should return 404', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const courseId = '5f9e9b3b3b3b3b3b3b3b3b3b';
+        const res1 = await request(app)
+            .post(`/student/enroll/${courseId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+});
+
