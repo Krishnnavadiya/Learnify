@@ -438,3 +438,24 @@ describe('Educator Controller - resetPassword', () => {
     });
 });
 
+describe('Educator Controller - updatePassword', () => {
+    it('should not update password if token is invalid', async () => {
+        const resEmail = await request(app).post('/educator/update-password')
+            .send({
+                email: 'testeducator@example.com'
+            });
+
+        expect(resEmail.status).to.equal(404);
+        expect(resEmail.body.message).to.equal('Token not found - Educator');
+    });
+
+    it('should return 404 if educator does not exist', async () => {
+        const resEmail = await request(app).post('/educator/update-password')
+            .send({
+                email: 'testeducator@example1.com'
+            });
+
+        expect(resEmail.status).to.equal(404);
+        expect(resEmail.body.message).to.equal('User not found - Educator');
+    });
+});
