@@ -176,3 +176,15 @@ exports.testStream = async (req, res, next) => {
     }
 };
 
+function getContentType(filePath) {
+    const extname = path.extname(filePath);
+    switch (extname) {
+        case '.mp4':
+            return 'video/mp4';
+        case '.pdf':
+            return 'application/pdf';
+        default:
+            return 'application/octet-stream';
+    }
+}
+
