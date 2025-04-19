@@ -283,3 +283,24 @@ describe('Query Controller - getRecommendedCourses', () => {
     });
 });
 
+describe('Query Controller - generateGraph', () => {
+    it('should return graph', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        let res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        res = await request(app)
+            .get('/query/generateGraph')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('courseTitle');
+        expect(res.body).to.have.property('enrolled');
+    });
+});
