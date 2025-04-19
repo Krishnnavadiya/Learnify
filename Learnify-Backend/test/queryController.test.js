@@ -123,3 +123,63 @@ describe('Query Controller - getDashboard', () => {
     });
 });
 
+describe('Query Controller - getProfile', () => {
+    it('should return profile if it is an educator', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const res2 = await request(app)
+            .get('/query/profile')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body).to.have.property('educator');
+    });
+    it('should return profile if it is a student', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const res2 = await request(app)
+            .get('/query/profile')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body).to.have.property('student');
+    });
+    it('should return 401 if user not found', async () => {
+        const edu = {
+            email: 'testeduc1ator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(edu);
+
+        await Educator.deleteOne({email: 'testeduc1ator@example.com'});
+
+        const res2 = await request(app)
+            .get('/query/profile')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res2.statusCode).to.equal(404);
+        expect(res2.body.message).to.equal('Educator not found');
+    });
+});
+
+
