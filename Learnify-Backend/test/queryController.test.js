@@ -23,3 +23,14 @@ afterAll(async () => {
     await mongoose.disconnect();
 });
 
+describe('Query Controller - getAllCourses', () => {
+    it('should return all courses', async () => {
+        const res = await request(app)
+            .get('/query/allcourse')
+            .send();
+
+        expect(res.statusCode).equal(200);
+        expect(res.body).to.have.property('courses');
+    });
+});
+
