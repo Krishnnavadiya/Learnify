@@ -251,3 +251,46 @@ describe('Educator Controller - userSignup', () => {
 
 });
 
+describe('Educator Controller - userLogin', () => {
+    it('should login an existing educator', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body.message).to.equal('Logged In Successfully - Educator');
+        expect(res.body.token).to.not.equal(null);
+    });
+    it('should not login an educator with the wrong password', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'wrongPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(404);
+        expect(res.body.message).to.equal('Wrong Password - Educator');
+    });
+    it('should not login an educator with the wrong email', async () => {
+        const educator = {
+            email: 'tested@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(404);
+        expect(res.body.message).to.equal('User does not exist - Educator');
+    });
+});
+
