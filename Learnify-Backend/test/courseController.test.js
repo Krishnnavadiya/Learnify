@@ -525,3 +525,77 @@ describe('Course Controller - removeStudent', () => {
         expect(res1.body.message).to.equal('Course not found');
     });
 });
+describe('Course Controller - rateCourse', () => {
+    it('should rate course', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const course = await Course.findOne({});
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const res1 = await request(app)
+            .post(`/student/enroll/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        const enrolledCourse = await Student.findOne({email: 'teststudent@example.com'});
+
+        const res2 = await request(app)
+            .post(`/student/rating/${enrolledCourse.enrolledCourses[0]}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({
+                rating: 4,
+                comment: 'Nice'
+            });
+
+        console.log(res2.body);
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body.message).to.equal('Rated Successfully');
+    });
+    it('if course does not exist, should return 404', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const res1 = await request(app)
+            .post(`/student/rating/5f9e9b3b3b3b3b3b3b3b3b3b`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({
+                rating: 4
+            });
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('if already rated, should return 401', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const enrolledCourse = await Student.findOne({email: 'teststudent@example.com'}).populate('enrolledCourses');
+
+        const res1 = await request(app)
+            .post(`/student/rating/${enrolledCourse.enrolledCourses[0]._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({
+                rating: 4
+            });
+
+        expect(res1.statusCode).to.equal(401);
+        expect(res1.body.message).to.equal('Already rated');
+    });
+});
