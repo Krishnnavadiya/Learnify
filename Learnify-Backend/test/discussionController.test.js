@@ -282,3 +282,91 @@ describe('Discussion Forum - Edit Message', () => {
     });
 });
 
+describe('Discussion Forum - Delete Message', () => {
+    it('should return 404 if course does not exist', async () => {
+        const res = await request(app)
+            .post('/student/login')
+            .send({
+                email: 'teststudent@example.com',
+                password: 'testPassword',
+            })
+
+        const courseId = '5f9f2f1c9d7c1f1f5c8c8c8c';
+        const messageId = '5f9f2f1c9d7c1f1f5c8c8c8c';
+
+        const res1 = await request(app)
+            .delete(`/student/${courseId}/discussion/${messageId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.status).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('should return 404 if course does not exist', async () => {
+        const res = await request(app)
+            .post('/educator/login')
+            .send({
+                email: 'testeducator@example.com',
+                password: 'testPassword',
+            })
+
+        const courseId = '5f9f2f1c9d7c1f1f5c8c8c8c';
+        const messageId = '5f9f2f1c9d7c1f1f5c8c8c8c';
+
+        const res1 = await request(app)
+            .delete(`/educator/${courseId}/discussion/${messageId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.status).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('should delete message - student', async () => {
+        const res = await request(app)
+            .post('/student/login')
+            .send({
+                email: 'teststudent@example.com',
+                password: 'testPassword',
+            })
+
+        const course = await Student.findOne({email: 'teststudent@example.com'}).populate('enrolledCourses').exec();
+        const courseId = await Course.findById(course.enrolledCourses[0]._id).populate('discussionForum').exec();
+        let messageId;
+        for (let i = 0; i < courseId.discussionForum.messages.length; i++) {
+            if (courseId.discussionForum.messages[i].createdByStudent !== null && courseId.discussionForum.messages[i].createdByStudent.toString() === course._id.toString()) {
+                messageId = courseId.discussionForum.messages[i]._id;
+                break;
+            }
+        }
+
+        const res1 = await request(app)
+            .delete(`/student/${course.enrolledCourses[0]._id}/discussion/${messageId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.status).to.equal(200);
+        expect(res1.body.message).to.equal('Message deleted');
+    });
+    it('should delete message - educator', async () => {
+        const res = await request(app)
+            .post('/educator/login')
+            .send({
+                email: 'testeducator@example.com',
+                password: 'testPassword',
+            })
+
+        const course = await Educator.findOne({email: 'testeducator@example.com'}).populate('courseCreated').exec();
+        const courseId = await Course.findById(course.courseCreated[0]._id).populate('discussionForum').exec();
+        let messageId;
+        for(let i = 0; i < courseId.discussionForum.messages.length; i++) {
+            if(courseId.discussionForum.messages[i].createdByEducator !== null && courseId.discussionForum.messages[i].createdByEducator.toString() === course._id.toString()) {
+                messageId = courseId.discussionForum.messages[i]._id;
+                break;
+            }
+        }
+
+        const res1 = await request(app)
+            .delete(`/educator/${course.courseCreated[0]._id}/discussion/${messageId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+
+        expect(res1.status).to.equal(200);
+        expect(res1.body.message).to.equal('Message deleted');
+    });
+});
