@@ -182,4 +182,62 @@ describe('Query Controller - getProfile', () => {
     });
 });
 
+describe('Query Controller - getCoursePage', () => {
+    it('should return course page', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        let res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const course = await Course.findOne({});
+        res = await request(app)
+            .get(`/query/getCourse/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('course');
+    });
+    it('should return 404 if course not found', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        let res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        res = await request(app)
+            .get(`/query/getCourse/123456789012`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res.statusCode).to.equal(404);
+        expect(res.body.message).to.equal('Course not found');
+    });
+    it('should return course page', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        let res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const course = await Course.findOne({});
+        res = await request(app)
+            .get(`/query/getCourse/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('course');
+    });
+});
 
