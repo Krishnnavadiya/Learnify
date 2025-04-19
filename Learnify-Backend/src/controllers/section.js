@@ -194,3 +194,76 @@ exports.addPost = async (req, res, next) => {
     }
 };
 
+
+exports.editPost = async (req, res, next) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (course.createdBy.toString() !== req.userData.userId.toString()) {
+            return res.status(401).json({
+                message: 'Unauthorized'
+            });
+        }
+
+        const section = await Section.findById(req.params.sectionId).exec();
+        if (!section) {
+            return res.status(404).json({
+                message: 'Section not found'
+            });
+        }
+
+        const post = section.posts.id(req.params.postId);
+
+        if (!post) {
+            return res.status(404).json({
+                message: 'Post not found'
+            });
+        }
+
+        if (req.body.attachments) {
+            // check is req.body.attachments is an array
+            if (!Array.isArray(req.body.attachments)) {
+                fs.unlinkSync(req.body.attachments);
+                post.attachments.pull(req.body.attachments);
+            }
+            else {
+                for (let i = 0; i < req.body.attachments.length; i++) {
+                    post.attachments.pull(req.body.attachments[i]);
+                    fs.unlinkSync(req.body.attachments[i]);
+                }
+            }
+        }
+
+        if (req.files) {
+            const attachments = req.files.map(file => file.path);
+            post.attachments.push(...attachments);
+        }
+        if (req.body.title) {
+            post.title = req.body.title;
+        }
+        if (req.body.body) {
+            post.body = req.body.body;
+        }
+
+        await section.save();
+
+        return res.status(200).json({
+            message: 'Post edited',
+            post: post
+        });
+
+    } catch (err) {
+        console.log(err);
+
+        return res.status(500).json({
+            error: err
+        });
+    }
+}
+
