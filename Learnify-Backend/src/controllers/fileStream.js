@@ -188,3 +188,30 @@ function getContentType(filePath) {
     }
 }
 
+exports.verifyCertificate = async (req, res, next) => {
+    try {
+        const certificate = await Certificate.findById(req.params.certificateId).exec();
+        if (!certificate) {
+            return res.status(404).json({
+                message: 'Certificate not found'
+            });
+        }
+
+        const student = await Student.findById(certificate.student).select('fname lname').exec();
+        const educator = await Educator.findById(certificate.educator).select('fname lname').exec();
+        const course = await Course.findById(certificate.course).select('courseCode courseTitle').exec();
+
+        return res.status(200).json({
+            student: student,
+            educator: educator,
+            course: course,
+            dateCreated: certificate.dateCreated
+        });
+
+    } catch(err) {
+        console.error(err);
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+}
