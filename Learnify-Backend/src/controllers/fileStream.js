@@ -84,3 +84,95 @@ exports.streamFile = async (req, res, next) => {
     }
 }
 
+exports.testStream = async (req, res, next) => {
+    try {
+        const jwttoken = req.query.jwt;
+        req.userData = jwt.verify(jwttoken, process.env.JWT_KEY);
+
+        const courseId = req.query.courseId;
+        if (!courseId) {
+            return res.status(400).json({
+                message: 'Course ID not found'
+            });
+        }
+
+        const course = await Course.findById(courseId).exec();
+        if (!course) {
+            return res.status(404).json({
+                message: 'Course not found'
+            });
+        }
+
+        if (req.userData.userType === 'student') {
+            if (!course.enrolledStudents.includes(req.userData.userId)) {
+                return res.status(401).json({
+                    message: 'You are not enrolled in this course'
+                });
+            }
+        }
+        else {
+            if (!course.createdBy.equals(req.userData.userId)) {
+                return res.status(401).json({
+                    message: 'You are not the creator of this course'
+                });
+            }
+        }
+
+        const videoPath = req.query.path;
+
+        const courseString = course.courseCode + '-' + course.courseTitle;
+
+        if (!videoPath.includes(courseString)) {
+            return res.status(401).json({
+                message: 'You are not enrolled in this course'
+            });
+        }
+        if (!videoPath) {
+            return res.status(400).json({
+                message: 'Path not found'
+            });
+        }
+
+        if (!fs.existsSync(videoPath)) {
+            return res.status(404).json({
+                message: 'File not found'
+            });
+        }
+
+        const fileSize = fs.statSync(videoPath).size;
+        const range = req.headers.range;
+
+        if (range) {
+            const CHUNK_SIZE = 10 ** 6;
+            const start = Number(range.replace(/\D/g, ""));
+            const end = Math.min(start + CHUNK_SIZE, fileSize - 1);
+
+            const contentLength = end - start + 1;
+
+            const headers = {
+                "Content-Range": `bytes ${start}-${end}/${fileSize}`,
+                "Accept-Ranges": "bytes",
+                "Content-Length": contentLength,
+                "Content-Type": getContentType(videoPath),
+            };
+
+            res.writeHead(206, headers);
+
+            const videoStream = fs.createReadStream(videoPath, { start, end });
+            videoStream.pipe(res);
+        } else {
+            const head = {
+                'Content-Length': fileSize,
+                'Content-Type': getContentType(videoPath),
+            };
+            res.writeHead(200, head);
+            fs.createReadStream(videoPath).pipe(res);
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+            error: err.message
+        });
+    }
+};
+
