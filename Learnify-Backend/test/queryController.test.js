@@ -241,3 +241,24 @@ describe('Query Controller - getCoursePage', () => {
     });
 });
 
+describe('Query Controller - getEnrolledCourses', () => {
+    it('should return enrolled courses', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        let res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        res = await request(app)
+            .get('/query/enrolled-course')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send();
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body).to.have.property('courses');
+    });
+});
+
