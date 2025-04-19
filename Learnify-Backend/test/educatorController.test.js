@@ -395,3 +395,46 @@ describe('Educator Controller - userDelete', () => {
         expect(deleteRes2.body.message).to.equal('Educator not found');
     });
 });
+describe('Educator Controller - resetPassword', () => {
+    it('should reset password', async () => {
+        const testEducator = {
+            fname: 'Test',
+            lname: 'Educator',
+            gender: 'Male',
+            dob: '1990-01-01',
+            location: 'Test Location',
+            username: 'testeducator',
+            password: 'testPassword',
+            phone: '1234567890',
+            email: 'testeducator@example.com',
+            upiID: 'testUPI@okAxis',
+            bio: 'Test bio'
+        };
+
+        const res = await request(app)
+            .post('/educator/signup')
+            .send(testEducator);
+
+        expect(res.status).to.equal(201);
+        expect(res.body.message).to.equal('Educator created');
+
+        const resEmail = await request(app).post('/educator/reset-password')
+            .send({
+                email: 'testeducator@example.com',
+            });
+
+        expect(resEmail.status).to.equal(200);
+        expect(resEmail.body.message).to.equal('Email sent successfully');
+    });
+
+    it('should return 404 if educator does not exist', async () => {
+        const resEmail = await request(app).post('/educator/reset-password')
+            .send({
+                email: 'testeducator@example1.com'
+            });
+
+        expect(resEmail.status).to.equal(404);
+        expect(resEmail.body.message).to.equal('User not found - Educator');
+    });
+});
+
