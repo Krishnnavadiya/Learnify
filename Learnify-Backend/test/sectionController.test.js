@@ -357,3 +357,137 @@ describe('Section Controller - addPost', () => {
     });
 });
 
+describe('Section Controller - editPost', () => {
+    it('should edit a post in a section', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+        const post = {
+            title: 'testPost',
+            body: 'testContent',
+        }
+        const imagePath = path.join(__dirname, 'images.png'); // Replace with the actual path to your educator's profile picture
+        const profilePic = fs.readFileSync(imagePath);
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+        const res1 = await request(app)
+            .patch(`/educator/edit-post/${course._id}/${course.courseSections[0]._id}/${course.courseSections[0].posts[0]._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .field('title', post.title)
+            .field('body', post.body)
+            .attach('attachments', profilePic, 'profilePic.png');
+
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Post edited');
+    });
+    it('should not edit a post in a section if course does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const post = {
+            title: 'testPost1',
+            body: 'testContent1',
+        }
+        const res1 = await request(app)
+            .patch('/educator/edit-post/123456789012345678901234/123456789012345678901234/123456789012345678901234')
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send(post);
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('should not edit a post in a section if section does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const post = {
+            title: 'testPost1',
+            body: 'testContent1',
+        }
+
+        const res1 = await request(app)
+            .patch(`/educator/edit-post/${course._id}/123456789012345678901234/123456789012345678901234`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send(post);
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Section not found');
+    });
+    it('should not edit a post in a section if post does not exist', async () => {
+        const educator1 = {
+            email: 'testeducator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const post = {
+            title: 'testPost1',
+            body: 'testContent1',
+        }
+
+        const res1 = await request(app)
+            .patch(`/educator/edit-post/${course._id}/${course.courseSections[0]._id}/123456789012345678901234`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send(post);
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Post not found');
+    });
+    it('should not edit a post in a section if user is not the creator of the course', async () => {
+        const educator1 = {
+            email: 'testeduc1ator@example.com',
+            password: 'testPassword',
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator1)
+
+        const educator = await Educator.findOne({email: 'testeducator@example.com'}).exec();
+        const course = await Course.findOne({_id: educator.courseCreated[0]}).populate('courseSections').exec();
+
+        const post = {
+            title: 'testPost1',
+            body: 'testContent1',
+        }
+
+        const res1 = await request(app)
+            .patch(`/educator/edit-post/${course._id}/${course.courseSections[0]._id}/${course.courseSections[0].posts[0]._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send(post);
+
+        expect(res1.statusCode).to.equal(401);
+        expect(res1.body.message).to.equal('Unauthorized');
+    });
+});
+
