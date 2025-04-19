@@ -275,3 +275,79 @@ describe('Course Controller - editCourse', () => {
     });
 });
 
+describe('Course Controller - deleteCourse', () => {
+    it('if course does not exist, should return 404', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const courseId = '5f9e9b3b3b3b3b3b3b3b3b3b';
+
+        const res2 = await request(app)
+            .patch(`/educator/edit-course/${courseId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res2.statusCode).to.equal(404);
+        expect(res2.body.message).to.equal('Course not found');
+    });
+    it('other educator should not be able to delete course', async () => {
+        const educator = {
+            fname: 'Test',
+            lname: 'Educator2',
+            gender: 'Male',
+            dob: '1990-01-01',
+            location: 'Test Location',
+            username: 'test1educator',
+            password: 'testPassword',
+            phone: '1234567190',
+            email: 'testeduc1ator@example.com',
+            upiID: 'testUPI@okAxis',
+            bio: 'Test bio'
+        }
+
+        const res1 = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Logged In Successfully - Educator');
+
+        const course = await Educator.findOne({email: 'testeducator@example.com'}).populate('courseCreated');
+        const courseId = course.courseCreated[0]._id;
+
+        const res2 = await request(app)
+            .post(`/educator/delete-course/${courseId}`)
+            .set('Authorization', 'Bearer ' + res1.body.token)
+            .send({});
+
+        expect(res2.statusCode).to.equal(401);
+        expect(res2.body.message).to.equal('Unauthorized');
+    });
+    it('creator of course should be able to delete course', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+        const edu = await Educator.findOne({email: 'testeducator@example.com'}).populate('courseCreated');
+        const courseId = edu.courseCreated[0]._id;
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const res1 = await request(app)
+            .post(`/educator/delete-course/${courseId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Email sent successfully');
+    });
+});
+
