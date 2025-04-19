@@ -351,3 +351,85 @@ describe('Course Controller - deleteCourse', () => {
     });
 });
 
+describe('Course Controller - enrollCourse', () => {
+    it('student should be able to enroll in a course', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const course = await Course.findOne({});
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const res1 = await request(app)
+            .post(`/student/enroll/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        console.log(res1.body);
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Enrolled');
+    });
+    it('if course does not exist, should return 404', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const courseId = '5f9e9b3b3b3b3b3b3b3b3b3b';
+        const res1 = await request(app)
+            .post(`/student/enroll/${courseId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+    it('if student is already enrolled, should return 401', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const course = await Course.findOne({});
+        const res1 = await request(app)
+            .post(`/student/enroll/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res1.statusCode).to.equal(401);
+        expect(res1.body.message).to.equal('Already enrolled');
+    });
+    it('if course is private, should return 401', async () => {
+        const student = {
+            email: 'teststudent@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/student/login')
+            .send(student);
+
+        const course = await Course.findOne({});
+        const res1 = await request(app)
+            .post(`/student/enroll/${course._id}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        if (course.visibility === 'private') {
+            expect(res1.statusCode).to.equal(401);
+            expect(res1.body.message).to.equal('It is a private course');
+        }
+    });
+});
+
