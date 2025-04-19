@@ -148,3 +148,130 @@ describe('Course Controller - createCourse', () => {
     });
 });
 
+describe('Course Controller - editCourse', () => {
+    it('creator of course should be able to edit course', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(200);
+        expect(res.body.message).to.equal('Logged In Successfully - Educator');
+        expect(res.body.token).to.not.equal(null);
+
+        //     take one course from educator's course list
+        const course = await Educator.findOne({email: 'testeducator@example.com'}).populate('courseCreated');
+        const courseId = course.courseCreated[0]._id;
+
+        const courseEdit = {
+            courseTitle: 'Test Course Edited',
+            courseDescription: 'This is a test course.',
+            courseDescriptionLong: 'A longer description of the test course.',
+            coursePrice: 19.99,
+            tags: ['Programming', 'Testing'],
+            courseLevel: 'Beginner',
+            courseCode: 'TEST123',
+            language: 'English',
+            visibility: 'public',
+            prerequisites: 'Basic knowledge of programming',
+        };
+        const imagePath = path.join(__dirname, 'images.png'); // Replace with the actual path to your educator's profile picture
+        const profilePic = fs.readFileSync(imagePath);
+
+        const res2 = await request(app)
+            .patch(`/educator/edit-course/${courseId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .field('courseTitle', courseEdit.courseTitle)
+            .field('courseDescription', courseEdit.courseDescription)
+            .field('courseDescriptionLong', courseEdit.courseDescriptionLong)
+            .field('coursePrice', courseEdit.coursePrice)
+            .field('tags', courseEdit.tags)
+            .field('courseLevel', courseEdit.courseLevel)
+            .field('courseCode', courseEdit.courseCode)
+            .field('language', courseEdit.language)
+            .field('visibility', courseEdit.visibility)
+            .field('prerequisites', courseEdit.prerequisites)
+            .attach('thumbnail', profilePic, 'profilePic.png');
+
+        expect(res2.statusCode).to.equal(200);
+        expect(res2.body.message).to.equal('Course updated');
+    });
+    it('other educator should not be able to edit course', async () => {
+        const educator = {
+            fname: 'Test',
+            lname: 'Educator2',
+            gender: 'Male',
+            dob: '1990-01-01',
+            location: 'Test Location',
+            username: 'test1educator',
+            password: 'testPassword',
+            phone: '1234567190',
+            email: 'testeduc1ator@example.com',
+            upiID: 'testUPI@okAxis',
+            bio: 'Test bio'
+        }
+
+        const res = await request(app)
+            .post('/educator/signup')
+            .send(educator);
+
+        expect(res.statusCode).to.equal(201);
+        expect(res.body.message).to.equal('Educator created');
+
+        const res1 = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Logged In Successfully - Educator');
+
+        const course = await Educator.findOne({email: 'testeducator@example.com'}).populate('courseCreated');
+        const courseId = course.courseCreated[0]._id;
+
+        const courseEdit = {
+            courseTitle: 'Test Course Edited',
+            courseDescription: 'This is a test course.',
+            courseDescriptionLong: 'A longer description of the test course.',
+            coursePrice: 19.99,
+            tags: ['Programming', 'Testing'],
+            courseLevel: 'Beginner',
+            courseCode: 'TEST123',
+            language: 'English',
+            visibility: 'public',
+            prerequisites: 'Basic knowledge of programming',
+        };
+
+        const res2 = await request(app)
+            .patch(`/educator/edit-course/${courseId}`)
+            .set('Authorization', 'Bearer ' + res1.body.token)
+            .send(courseEdit);
+
+        expect(res2.statusCode).to.equal(401);
+        expect(res2.body.message).to.equal('Unauthorized');
+    });
+    it('if course does not exist, should return 404', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const courseId = '5f9e9b3b3b3b3b3b3b3b3b3b';
+
+        const res2 = await request(app)
+            .patch(`/educator/edit-course/${courseId}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res2.statusCode).to.equal(404);
+        expect(res2.body.message).to.equal('Course not found');
+    });
+});
+
