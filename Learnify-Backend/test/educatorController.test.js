@@ -339,3 +339,59 @@ describe('Educator Controller - userEdit', () => {
     });
 });
 
+describe('Educator Controller - userDelete', () => {
+    it('should delete a educator', async () => {
+        const loginRes = await request(app)
+            .post('/educator/login')
+            .send({
+                email: 'testeducator@example.com',
+                password: 'testPassword',
+            });
+        const deleteRes = await request(app)
+            .delete('/educator/testeducator@example.com')
+            .set('Authorization', 'Bearer ' + loginRes.body.token);
+
+        expect(deleteRes.status).to.equal(200);
+        expect(deleteRes.body.message).to.equal('Educator deleted');
+    });
+    it('should return 404 if educator does not exist', async () => {
+        const testEducator = {
+            fname: 'Test',
+            lname: 'Educator',
+            gender: 'Male',
+            dob: '1990-01-01',
+            location: 'Test Location',
+            username: 'testeducator',
+            password: 'testPassword',
+            phone: '1234567890',
+            email: 'testeducator@example.com',
+            upiID: 'testUPI@okAxis',
+            bio: 'Test bio'
+        };
+
+        const res = await request(app)
+            .post('/educator/signup')
+            .send(testEducator);
+
+        expect(res.status).to.equal(201);
+        expect(res.body.message).to.equal('Educator created');
+
+        const loginRes = await request(app)
+            .post('/educator/login')
+            .send({
+                email: 'testeducator@example.com',
+                password: 'testPassword',
+            });
+
+        const deleteRes = await request(app)
+            .delete('/educator/testeducator@example.com')
+            .set('Authorization', 'Bearer ' + loginRes.body.token);
+
+        const deleteRes2 = await request(app)
+            .delete('/educator/testeducator@example.com')
+            .set('Authorization', 'Bearer ' + loginRes.body.token);
+
+        expect(deleteRes2.status).to.equal(404);
+        expect(deleteRes2.body.message).to.equal('Educator not found');
+    });
+});
