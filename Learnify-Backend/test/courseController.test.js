@@ -481,3 +481,47 @@ describe('Course Controller - unenrollCourse', () => {
     });
 });
 
+describe('Course Controller - removeStudent', () => {
+    it('should remove student from course', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const course = await Course.findOne({});
+        const student = course.enrolledStudents[0];
+
+        const res1 = await request(app)
+            .post(`/educator/remove-student/${course._id}/${student}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res1.statusCode).to.equal(200);
+        expect(res1.body.message).to.equal('Student removed');
+    });
+    it('if course does not exist, should return 404', async () => {
+        const educator = {
+            email: 'testeducator@example.com',
+            password: 'testPassword'
+        };
+
+        const res = await request(app)
+            .post('/educator/login')
+            .send(educator);
+
+        const course = "5f9e9b3b3b3b3b3b3b3b3b3b";
+        const student = "5f9e9b3b3b3b3b3b3b3b3b3b";
+
+        const res1 = await request(app)
+            .post(`/educator/remove-student/${course}/${student}`)
+            .set('Authorization', 'Bearer ' + res.body.token)
+            .send({});
+
+        expect(res1.statusCode).to.equal(404);
+        expect(res1.body.message).to.equal('Course not found');
+    });
+});
