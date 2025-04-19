@@ -294,3 +294,48 @@ describe('Educator Controller - userLogin', () => {
     });
 });
 
+describe('Educator Controller - userEdit', () => {
+    it('should userId from jwt as student exists', async () => {
+        const editRes = await request(app)
+            .patch('/educator/edit-profile')
+            .set('Authorization', 'Bearer ' + "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJPbmxpbmUgSldUIEJ1aWxkZXIiLCJpYXQiOjE3MDAyOTk0NjksImV4cCI6MTczMTgzNTQ2OSwiYXVkIjoid3d3LmV4YW1wbGUuY29tIiwic3ViIjoianJvY2tldEBleGFtcGxlLmNvbSIsInVzZXJJZCI6IjkzODkzNDg5Mzg5MzUzNDA1MzQifQ.NdhN2vzwVFjnhVhjI-s5z-EL2ZrhMfEmhDcfSbk_YDA")
+            .send({
+                fname: 'EditedTest',
+            });
+
+        expect(editRes.status).to.equal(401);
+        expect(editRes.body.message).to.equal('Invalid token');
+    });
+    it('should edit a educator', async () => {
+        const loginRes = await request(app)
+            .post('/educator/login')
+            .send({
+                email: 'testeducator@example.com',
+                password: 'testPassword',
+            });
+
+        // Edit the student profile without changing the profile picture
+        const editRes = await request(app)
+            .patch('/educator/edit-profile')
+            .set('Authorization', 'Bearer ' + loginRes.body.token)
+            .send({
+                fname: 'JaySabva',
+            });
+
+        expect(editRes.status).to.equal(200);
+        expect(editRes.body.message).to.equal('Educator updated');
+    });
+    it('should handle errors during profile editing', async () => {
+        // Force an error during profile editing
+        const editRes = await request(app)
+            .patch('/educator/edit')
+            .set('Authorization', 'Bearer ' + 'invalidtoken')
+            .send({
+                fname: 'EditedTest',
+            });
+
+        expect(editRes.status).to.equal(404);
+        expect(editRes.body).to.have.property('error');
+    });
+});
+
