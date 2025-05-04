@@ -1,0 +1,201 @@
+/* AboutCard.css */
+
+.about-card-section {
+  padding: 80px 0;
+  background-color: #ffffff;
+  position: relative;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.about-card-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.about-content {
+  flex: 1;
+}
+
+.section-header {
+  margin-bottom: 40px;
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: #3498db;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.section-title {
+  font-size: 2.2rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.divider {
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(90deg, #3498db, #2ecc71);
+  border-radius: 2px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
+.feature-card {
+  display: flex;
+  gap: 20px;
+  padding: 25px;
+  border-radius: 10px;
+  background-color: #f9fafc;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border-left: 4px solid #3498db;
+  background-color: white;
+}
+
+.feature-icon {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 50%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.feature-icon img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.feature-content h4 {
+  font-size: 2.3rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.feature-content p {
+  color: #576574;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.about-image {
+  flex: 1;
+  position: relative;
+}
+
+.educator-image {
+  width: 100%;
+  border-radius: 10px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  transition: transform 0.5s ease;
+}
+
+.educator-image:hover {
+  transform: scale(1.02);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .about-card-wrapper {
+    gap: 30px;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  .feature-card {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .about-card-wrapper {
+    flex-direction: column-reverse;
+  }
+
+  .about-content,
+  .about-image {
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: 1.6rem;
+  }
+
+  .feature-card {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .feature-icon {
+    margin-bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-card-section {
+    padding: 60px 0;
+  }
+
+  .section-title {
+    font-size: 1.4rem;
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .feature-content h4 {
+    font-size: 1.1rem;
+  }
+
+  .feature-content p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+  animation-delay: calc(var(--order) * 0.1s);
+}

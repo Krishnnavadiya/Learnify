@@ -1,0 +1,292 @@
+/* CSS Variables */
+:root {
+  --primary-color: #0c356a;
+  --danger-color: #c0392b;
+  --text-color: #2c3e50;
+  --background-color: #f8f9fa;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --spacing-lg: 2rem;
+  --spacing-md: 1.5rem;
+  --spacing-sm: 0.8rem;
+}
+
+/* Main Container */
+.epn-container1 {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background-color);
+}
+
+/* Edit Profile Container */
+.epn-edit-profile {
+  flex: 1;
+  padding: var(--spacing-lg);
+  padding-top: calc(80px + var(--spacing-lg));
+  /* Adjust for navbar height */
+  max-width: 1200px;
+  margin: 0 auto;
+  /* background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px var(--shadow-color); */
+}
+
+/* Upper Section */
+.epn-edit-upper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  background-color: transparent;
+}
+
+.epn-edit-sub-upper {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+  max-width: 800px;
+}
+
+.epn-edit-image-container1 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--spacing-lg);
+}
+
+.epn-edit-img1 {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 5px solid white;
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.epn-edit-img1 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.epn-edit-user {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.epn-edit-username1 {
+  font-size: 2.5rem;
+  color: var(--text-color);
+  font-weight: 600;
+  margin-bottom: var(--spacing-lg);
+}
+
+.epn-edit-about textarea {
+  width: 100%;
+  font-size: 1.3rem;
+  color: var(--text-color);
+  padding: var(--spacing-sm);
+  border: 1px solid #eee;
+  border-radius: 8px;
+  resize: vertical;
+  font-family: inherit;
+}
+
+/* Lower Section */
+.epn-edit-lover {
+  display: flex;
+  justify-content: center;
+}
+
+.epn-edit-basicinfo {
+  background: white;
+  border-radius: 12px;
+  padding: 3rem;
+  width: 100%;
+  max-width: 800px;
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+
+.epn-edit-basic-heading {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f1f1;
+  font-weight: 600;
+}
+
+.epn-edit-Sub-basicinfo {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--spacing-md);
+}
+
+.epn-edit-info-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.epn-edit-personalinfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.epn-edit-info-submain {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  margin-bottom: 1.88rem;
+  font-weight: 500;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid #eee;
+}
+
+.epn-edit-info-submain2 {
+  margin-bottom: var(--spacing-md);
+}
+
+.edp-edit-form-control {
+  width: 100%;
+  font-size: 1.3rem;
+  color: var(--text-color);
+  padding: var(--spacing-sm);
+  border: none;
+  border-bottom: 1px solid #eee;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+
+.edp-edit-form-control:focus {
+  outline: none;
+  border-bottom: 2px solid var(--primary-color);
+}
+
+/* Buttons */
+.epn-cancel-button,
+.epn-submit-button {
+  padding: 1rem 2.5rem;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(12, 53, 106, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 var(--spacing-sm);
+}
+
+.epn-cancel-button {
+  background-color: var(--danger-color);
+}
+
+.epn-cancel-button:hover,
+.epn-submit-button:hover {
+  background-color: #1a083f;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(12, 53, 106, 0.3);
+}
+
+.epn-cancel-button:focus,
+.epn-submit-button:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .epn-edit-info-main {
+    display: none;
+  }
+
+  .epn-edit-profile {
+    padding: var(--spacing-md);
+    padding-top: calc(80px + var(--spacing-md));
+  }
+
+  .epn-edit-sub-upper {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .epn-edit-image-container1 {
+    margin-right: 0;
+    margin-bottom: var(--spacing-lg);
+  }
+
+  .epn-edit-img1 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .epn-edit-username1 {
+    font-size: 2.2rem;
+  }
+
+  .epn-edit-basicinfo {
+    padding: 2rem;
+  }
+
+  .epn-edit-basic-heading {
+    font-size: 1.8rem;
+  }
+
+  .epn-edit-Sub-basicinfo {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .epn-edit-info-submain {
+    font-size: 1rem;
+  }
+
+  .edp-edit-form-control {
+    font-size: 1.2rem;
+  }
+
+  .epn-cancel-button,
+  .epn-submit-button {
+    font-size: 1.1rem;
+    width: 100%;
+    margin: var(--spacing-sm) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .epn-edit-info-main {
+    display: none;
+  }
+
+  .epn-edit-profile {
+    padding-top: calc(80px + var(--spacing-sm));
+  }
+
+  .epn-edit-img1 {
+    width: 130px;
+    height: 130px;
+  }
+
+  .epn-edit-username1 {
+    font-size: 2rem;
+  }
+
+  .epn-edit-basic-heading {
+    font-size: 1.6rem;
+  }
+
+  .edp-edit-form-control {
+    font-size: 1.1rem;
+  }
+
+  .epn-cancel-button,
+  .epn-submit-button {
+    padding: 1rem;
+  }
+}
