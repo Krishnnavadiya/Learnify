@@ -164,19 +164,4 @@ RAZORPAY_SECRET_KEY = your_razorpay_secret
 
 ---
 
-## Course Info  
-**Course:** IT632 Software Engineering  
-**Professor:** Jayprakash Lalchandani  
-**Mentor:** Sarthak , Tilak and Yash  
-**Group Number:** 28
-
----
-
-## 👥 Group Members
-- [@Krishn Navadiya](https://github.com/Krishnnavadiya)
-- [@Smit Kachhadiya](https://github.com/Krishnnavadiya)
-- [@Parth Limbachiya](https://github.com/Krishnnavadiya)
-  
----
-
 > _This README provides all essential backend documentation for developers and collaborators contributing to Learnify. For front-end documentation or deployment details, refer to the respective folders in the main repository._
