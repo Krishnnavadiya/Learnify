@@ -1,0 +1,259 @@
+/* Main Container - matches StuProfile */
+.profile-edit-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.profile-edit-content {
+    flex: 1;
+    padding: 2rem;
+    padding-top: 14rem;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* Header - matches StuProfile */
+.profile-edit-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 3rem;
+}
+
+.profile-avatar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.profile-avatar {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 5px solid white;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1.5rem;
+    position: relative;
+    cursor: pointer;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-avatar-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 1rem;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.profile-avatar:hover .profile-avatar-overlay {
+    opacity: 1;
+}
+
+.profile-username {
+    font-size: 3rem;
+    color: #2c3e50;
+    margin: 0;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Centered Form Container */
+.profile-edit-form-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.profile-edit-form {
+    background: white;
+    border-radius: 12px;
+    padding: 3rem;
+    width: 100%;
+    max-width: 800px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+}
+
+.profile-edit-title {
+    font-size: 2.4rem;
+    color: #0c356a;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f1f1f1;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Form Grid - matches StuProfile */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 1.2rem;
+    color: #7f8c8d;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1px solid lightgrey;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-input:focus {
+    border-color: #0c356a;
+    box-shadow: 0 0 0 3px rgba(12, 53, 106, 0.2);
+    outline: none;
+}
+
+.form-input::placeholder {
+    color: #bdc3c7;
+    opacity: 1;
+}
+
+/* Form Actions - matches StuProfile */
+.form-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 3rem;
+}
+
+.cancel-btn {
+    padding: 1rem 2.5rem;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.2);
+    text-align: center;
+}
+
+.cancel-btn:hover {
+    background-color: #c0392b;
+    color: #FFF;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+}
+
+.submit-btn {
+    padding: 1rem 2.5rem;
+    background-color: #0c356a;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(12, 53, 106, 0.2);
+}
+
+.submit-btn:hover {
+    background-color: #1a083f;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(12, 53, 106, 0.3);
+}
+
+/* Responsive Design - matches StuProfile */
+@media (max-width: 768px) {
+    .profile-edit-content {
+        padding: 1.5rem;
+        padding-top: 30rem;
+    }
+
+    .profile-avatar {
+        width: 150px;
+        height: 150px;
+    }
+
+    .profile-username {
+        font-size: 2.6rem;
+    }
+
+    .profile-edit-form {
+        padding: 2rem;
+    }
+
+    .profile-edit-title {
+        font-size: 2.1rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .cancel-btn,
+    .submit-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-edit-content {
+        padding-top: 10rem;
+    }
+
+    .profile-avatar {
+        width: 130px;
+        height: 130px;
+    }
+
+    .profile-username {
+        font-size: 2.3rem;
+    }
+
+    .profile-edit-title {
+        font-size: 1.9rem;
+    }
+
+    .form-label {
+        font-size: 1.1rem;
+    }
+
+    .form-input {
+        font-size: 1.1rem;
+    }
+
+    .cancel-btn,
+    .submit-btn {
+        padding: 1rem;
+        font-size: 1.2rem;
+    }
+}

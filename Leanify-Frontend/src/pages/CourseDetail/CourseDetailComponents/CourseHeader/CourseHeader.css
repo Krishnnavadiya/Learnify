@@ -1,0 +1,101 @@
+/* .course-header {
+    padding: 3rem 5rem;
+    box-shadow: 5px 6px 22px -5px rgba(12, 52, 106, 0.66);
+    -webkit-box-shadow: 5px 6px 22px -5px rgba(12, 52, 106, 0.66);
+    -moz-box-shadow: 5px 6px 22px -5px rgba(12, 52, 106, 0.66);
+  
+    background-image: url('./../../../../data/imgs/couse_page_bg.jpg');
+    background-size: cover;
+  
+    opacity: 1;
+} */
+
+.course-header {
+    position: relative;
+    padding: 3rem 5rem;
+    background-image: url('./../../../../data/imgs/cource-bg.jpg');
+    background-size: cover;
+    box-shadow: 5px 6px 22px -5px rgba(12, 52, 106, 0.66);
+    overflow: hidden;
+    /* ensure overlay stays inside */
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    /* more visible dark overlay */
+
+
+    /* white overlay with 60% opacity */
+    z-index: 0;
+    /* keep it behind the content */
+}
+
+/* all content inside course-header */
+.course-header-content {
+    position: relative;
+    z-index: 1;
+    /* make sure this is above the overlay */
+}
+
+.course-title>h2 {
+    color: white;
+    font-size: 5rem;
+}
+
+.course-description {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.course-description h5 {
+    text-transform: none;
+    color: white;
+    font-weight: 600;
+    font-size: 1.7rem;
+}
+
+.course-description img {
+    width: 25%;
+    height: 20%;
+}
+
+.course-rating {
+    margin-top: 2rem;
+    margin-left: -20px;
+}
+
+.course-header-botttom {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: left;
+    align-items: center;
+    margin-top: 2rem;
+    font-weight: 600;
+    font-size: 2.3rem;
+    color: white;
+}
+
+.course-header-botttom>* {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* gap : 10px; */
+    margin-right: 6rem;
+}
+
+.course-header-botttom>* :nth-child(1) {
+    font-size: 3.2rem;
+    margin-right: 1rem;
+}
+
+.student-button {
+    display: flex;
+    gap: 20px;
+    flex-direction: column
+}
