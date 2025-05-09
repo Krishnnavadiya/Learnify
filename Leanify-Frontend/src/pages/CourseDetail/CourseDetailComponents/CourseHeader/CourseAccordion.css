@@ -1,0 +1,41 @@
+.accordion {
+    font-size: 16px;
+}
+
+.download-pdf-btn {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #1976d2;
+    color: #1976d2;
+    border-radius: 10px;
+}
+
+
+.section-unit-titles {
+    font-size: 2rem;
+    border-radius: 10px;
+    padding: 0 20px;
+    margin: 10px 0;
+}
+
+.outer-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.unit-title {
+    font-size: 2rem;
+}
+
+.section-unit-items {
+    cursor: pointer;
+    color: #000;
+    padding: 10px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
